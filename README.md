@@ -1,5 +1,6 @@
-# albasma-al3tariya
-# البصمة العطرية / Perfume Print
+ # albasma-al3tariya
+
+ البصمة العطرية / Perfume Print
 
 منصة رقمية لاكتشاف التفضيلات العطرية.
 
@@ -9,8 +10,7 @@
 
 ## الرابط المباشر (Live Demo)
 
-https://ismailach07-droid.github.io/albasma-al3tariya/v95.html
-
+https://ismailach07-droid.github.io/albasma-al3tariya/v97.html
 ## الميزات
 
 - مسار سريع (6 أسئلة) ومسار معمّق (12 سؤالًا)
