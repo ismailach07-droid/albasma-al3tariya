@@ -4,8 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#0b0b0d">
-<title>البصمة العطرية V9.4.2</title>
-
+<title>البصمة العطرية V9.7</title>
+<!--
+  Perfume Print / البصمة العطرية
+  Copyright (c) 2026 Achfaa Ismail. All rights reserved.
+  Proprietary & Confidential.
+  Contact: ismailach07@gmail.com
+-->
 <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@master/qrcode.min.js"></script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -272,6 +277,86 @@ h1{font-size:29px;margin:0 0 9px;font-weight:600;letter-spacing:-.5px;}
 }
 /* ===== END V9.4 CSS ===== */
 
+/* ===== V9.5 — STATS & EXPORT CSS ===== */
+.dashboardActions{
+  display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;
+}
+.dashboardActions button{
+  flex:1;min-width:calc(50% - 4px);
+  padding:11px 14px;border-radius:12px;
+  font-family:inherit;font-size:12.5px;font-weight:600;
+  cursor:pointer;border:1px solid rgba(var(--accent-rgb),.35);
+  background:linear-gradient(145deg,#16161a,#111114);
+  color:var(--accent2);
+  transition:border-color .2s ease, background .2s ease, transform .1s ease;
+}
+.dashboardActions button:active{transform:scale(.98);}
+.dashboardActions button:hover{
+  border-color:rgba(var(--accent-rgb),.6);
+  background:linear-gradient(145deg,#1c1c22,#141418);
+}
+
+.statsCard{
+  background:linear-gradient(145deg,#19191d,#111115);
+  border:1px solid rgba(var(--accent-rgb),.28);
+  border-radius:16px;padding:16px 18px;margin-bottom:12px;
+}
+.statsCardTitle{
+  color:var(--accent);font-size:11px;letter-spacing:.5px;
+  margin-bottom:14px;text-transform:uppercase;
+}
+.statsGrid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:10px;
+}
+.statsItem{
+  background:#0f0f12;border:1px solid #26262c;
+  border-radius:12px;padding:12px 14px;
+  display:flex;flex-direction:column;gap:4px;
+}
+.statsNumber{
+  color:var(--accent2);font-size:24px;font-weight:700;
+  line-height:1.1;
+}
+.statsLabel{
+  color:#8a878e;font-size:11.5px;
+}
+
+.statsRow{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:9px 0;border-bottom:1px solid #23232a;
+  font-size:12.5px;
+}
+.statsRow:last-child{border-bottom:0;}
+.statsRowLabel{color:#c8c4bc;}
+.statsRowValue{color:var(--accent2);font-weight:700;}
+
+.statsBar{
+  height:6px;background:#1c1c22;border-radius:4px;
+  overflow:hidden;margin-top:6px;
+}
+.statsBarFill{
+  height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));
+  border-radius:4px;transition:width .4s ease;
+}
+
+.statsListItem{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:9px 12px;background:#0f0f12;
+  border:1px solid #26262c;border-radius:10px;
+  margin-bottom:6px;font-size:12.5px;
+}
+.statsListItem .sl-rank{
+  color:var(--accent);font-weight:700;
+  margin-inline-end:8px;font-size:11px;
+}
+.statsListItem .sl-name{
+  color:#e8e5df;font-weight:600;flex:1;
+}
+.statsListItem .sl-count{
+  color:var(--accent2);font-weight:700;font-size:12px;
+}
+/* ===== END V9.5 CSS ===== */
+
 @media(max-width:360px){
   .question{font-size:22px;}
   .app{padding-left:13px;padding-right:13px;}
@@ -348,6 +433,11 @@ h1{font-size:29px;margin:0 0 9px;font-weight:600;letter-spacing:-.5px;}
       </div>
       <button class="restart" onclick="goHome()" data-i18n="dashboardBack">رجوع</button>
     </div>
+<div class="dashboardActions">
+  <button onclick="openStatsScreen()" data-i18n="statsBtn">📊 إحصائيات</button>
+  <button onclick="exportCustomersCSV()" data-i18n="exportCustomersBtn">📥 تصدير العملاء</button>
+  <button onclick="exportTestsCSV()" data-i18n="exportTestsBtn">📥 تصدير الاختبارات</button>
+</div>
 
     <div class="searchWrap">
       <input type="text"
@@ -359,6 +449,20 @@ h1{font-size:29px;margin:0 0 9px;font-weight:600;letter-spacing:-.5px;}
     </div>
 
     <div id="customersList" class="customersList"></div>
+  </div>
+</section>
+
+<section id="statsScreen" class="screen">
+  <div class="top">
+    <div class="topLine">
+      <div>
+        <div class="counter" data-i18n="statsTitle">الإحصائيات</div>
+        <div class="selectionCounter" id="statsSubtitle"></div>
+      </div>
+      <button class="restart" onclick="openCustomersDashboard()" data-i18n="statsBack">رجوع</button>
+    </div>
+
+    <div id="statsContent"></div>
   </div>
 </section>
 
@@ -590,7 +694,25 @@ const I18N = {
     dashboardEmpty: "لا يوجد عملاء محفوظون بعد. أجرِ اختبارًا أولًا.",
     dashboardNoMatch: "لا يوجد عميل بهذا البحث.",
     dashboardSearchPlaceholder: "ابحث بالمعرف...",
-    dashboardLastTest: "آخر اختبار:"
+dashboardLastTest: "آخر اختبار:",
+/* ===== V9.5 ===== */
+statsBtn: "📊 إحصائيات",
+statsTitle: "الإحصائيات",
+statsBack: "رجوع",
+exportCustomersBtn: "📥 تصدير العملاء",
+exportTestsBtn: "📥 تصدير الاختبارات",
+statsTotalCustomers: "عدد العملاء",
+statsTotalTests: "عدد الاختبارات",
+statsAvgTestsPerCustomer: "متوسط الاختبارات لكل عميل",
+statsByCatalog: "توزيع المجموعات",
+statsByMode: "توزيع الأنماط",
+statsTopPerfumes: "أكثر 5 عطور موصى بها",
+statsNoData: "لا توجد بيانات بعد.",
+statsSubtitle: "نظرة عامة على العملاء والاختبارات",
+exportSuccess: "✓ تم تنزيل الملف",
+exportNoData: "لا توجد بيانات للتصدير.",
+shareSpecificTest: "📱 مشاركة هذا الاختبار",
+shareLastTest: "📱 مشاركة آخر اختبار"
   },
 
   fr: {
@@ -736,8 +858,26 @@ const I18N = {
     dashboardEmpty: "Aucun client enregistré. Faites d'abord un test.",
     dashboardNoMatch: "Aucun client pour cette recherche.",
     dashboardSearchPlaceholder: "Rechercher par identifiant...",
-    dashboardLastTest: "Dernier test :"
-  }
+      dashboardLastTest: "Dernier test :",
+  /* ===== V9.5 ===== */
+  statsBtn: "📊 Statistiques",
+  statsTitle: "Statistiques",
+  statsBack: "Retour",
+  exportCustomersBtn: "📥 Exporter les clients",
+  exportTestsBtn: "📥 Exporter les tests",
+  statsTotalCustomers: "Nombre de clients",
+  statsTotalTests: "Nombre de tests",
+  statsAvgTestsPerCustomer: "Moyenne de tests par client",
+  statsByCatalog: "Répartition par collection",
+  statsByMode: "Répartition par mode",
+  statsTopPerfumes: "Top 5 des parfums suggérés",
+  statsNoData: "Aucune donnée pour le moment.",
+  statsSubtitle: "Vue d'ensemble des clients et des tests",
+  exportSuccess: "✓ Fichier téléchargé",
+  exportNoData: "Aucune donnée à exporter.",
+  shareSpecificTest: "📱 Partager ce test",
+  shareLastTest: "📱 Partager le dernier test"
+}
 };
 
 /* ===== V9.4.1 — applyI18n موحّدة (تعريف واحد فقط) ===== */
@@ -795,11 +935,17 @@ function setLanguage(lang, save){
 
   applyI18n();
   applyUIText();
-  _refreshDashboardIfActive();
+    _refreshDashboardIfActive();
+  _refreshStatsIfActive();
 }
 /* ===== END setLanguage ===== */
 
 /* ===== V9.4.1 — إعادة رسم اللوحة عند تبديل اللغة (تستخدم _customersRowsCache) ===== */
+function _refreshStatsIfActive(){
+  const stats = document.getElementById("statsScreen");
+  if(!stats || !stats.classList.contains("active")) return;
+  renderStatsScreen();
+}
 function _refreshDashboardIfActive(){
   const dash = document.getElementById("customersScreen");
   if(!dash || !dash.classList.contains("active")) return;
@@ -816,227 +962,8 @@ function toggleLanguage(){
 
 /* ===== V9.4.1 — ذاكرة صفوف اللوحة (اسم واحد فقط) ===== */
 let _customersRowsCache = [];
+let _statsCache = null;
 /* ===== END ===== */
-/* =========================================================
-   FRENCH TRANSLATIONS — Questions & Hints
-   ========================================================= */
-
-const FR_QUESTIONS = {
-  "الأجواء": "Ambiances",
-  "الروائح": "Odeurs",
-  "الإحساس": "Sensation",
-  "الحضور": "Présence",
-  "الصورة": "Image",
-  "الرسالة": "Message",
-  "الصوت": "Sons",
-  "الموسيقى": "Musique",
-  "العائلة العطرية": "Famille olfactive",
-  "الميزان": "Équilibre",
-  "الملمس": "Texture",
-  "الاكتشاف": "Découverte",
-  "التفاصيل الحسية": "Détails sensoriels",
-  "التعبير عن الذات": "Expression de soi",
-  "الأثر": "Impact",
-  "المزاج": "Humeur",
-  "الاختيار الأخير": "Dernier choix",
-  "المكان": "Lieu",
-  "الذاكرة الحسية": "Mémoire sensorielle",
-  "التفاصيل": "Détails",
-  "التناقض": "Contraste",
-  "الحلاوة": "Douceur",
-  "الجانب الزهري": "Note florale",
-  "علاقتك بالمألوف": "Rapport au familier",
-  "البصمة": "Empreinte",
-
-  "أي أجواء تجذبك من النظرة الأولى؟":
-    "Quelles ambiances vous attirent au premier regard ?",
-  "أي روائح من الحياة اليومية تجد فيها شيئاً جميلاً؟":
-    "Quelles odeurs du quotidien trouvez-vous belles ?",
-  "ما الإحساس الذي تبحث عنه أكثر في العطر؟":
-    "Quelle sensation recherchez-vous le plus dans un parfum ?",
-  "كيف تحب أن يُلاحظ عطرك؟":
-    "Comment aimez-vous que votre parfum soit remarqué ?",
-  "ما الصورة التي تريد أن يتركها عطرك؟":
-    "Quelle image voulez-vous que votre parfum laisse ?",
-  "لو كان عطرك رسالة عنك، ماذا تريد أن يقول؟":
-    "Si votre parfum était un message sur vous, que voudriez-vous qu'il dise ?",
-  "لو استطعت أن تنتقل الآن إلى أي أجواء، ماذا تختار؟":
-    "Si vous pouviez vous transporter maintenant dans n'importe quelle ambiance, que choisiriez-vous ?",
-  "أي أصوات يمكن أن تجعلك تستمتع بالمكان أكثر؟":
-    "Quels sons pourraient vous faire apprécier davantage un lieu ?",
-  "أي أجواء موسيقية أقرب إلى ذوقك؟":
-    "Quelles ambiances musicales sont les plus proches de votre goût ?",
-  "أي إحساس تبحث عنه أكثر في العطر؟":
-    "Quelle sensation recherchez-vous le plus dans un parfum ?",
-  "إلى أي مدى تحب أن يصل عطرك إلى الآخرين؟":
-    "Jusqu'où aimez-vous que votre parfum parvienne aux autres ?",
-  "أي عالم من الروائح يجذبك أكثر؟":
-    "Quel univers olfactif vous attire le plus ?",
-  "إلى أي جهة تميل؟":
-    "Vers quel côté penchez-vous ?",
-  "أي إحساس أقرب إلى أنفك؟":
-    "Quelle sensation est la plus proche de votre nez ?",
-  "عندما تختار عطراً، أين تجد نفسك؟":
-    "Lorsque vous choisissez un parfum, où vous situez-vous ?",
-
-  "حين تدخلين مكانًا لأول مرة، أي أجواء تشد انتباهك تلقائيًا؟":
-    "Lorsque vous entrez dans un lieu pour la première fois, quelles ambiances attirent votre attention ?",
-  "أحيانًا تكون هناك رائحة بسيطة تجعل المكان أجمل. أيها أقرب إليك؟":
-    "Parfois une simple odeur rend un lieu plus beau. Laquelle est la plus proche de vous ?",
-  "إذا أردتِ أن يلتقط شخص ما شيئًا من شخصيتك من دون أن تتكلمي، ماذا تفضلين أن يشعر؟":
-    "Si quelqu'un devait saisir quelque chose de votre personnalité sans que vous parliez, que préféreriez-vous qu'il ressente ?",
-  "حين تغادرين مكانًا، أي أثر يعجبك أن يبقى منك؟":
-    "Lorsque vous quittez un lieu, quelle trace aimez-vous laisser ?",
-  "أي حالة تشعرين أنها الأقرب إلى مزاجك حين تكونين على طبيعتك؟":
-    "Quel état vous semble le plus proche de votre humeur lorsque vous êtes vous-même ?",
-  "لو كان عطرك لا يقول عنك إلا جملة واحدة، أي جملة تختارين؟":
-    "Si votre parfum ne disait qu'une seule phrase de vous, laquelle choisiriez-vous ?",
-  "لو استطعتِ أن تحتفظي بمشهد واحد حولك طوال اليوم، أي مشهد تختارين؟":
-    "Si vous pouviez garder un seul décor autour de vous toute la journée, lequel choisiriez-vous ?",
-  "أي رائحة يمكن أن تعيدك فورًا إلى لحظة جميلة؟":
-    "Quelle odeur peut vous ramener instantanément à un beau moment ?",
-  "حين تعجبك شخصية أو مكان، ما الذي يجذبك فيه أولًا؟":
-    "Lorsqu'une personne ou un lieu vous plaît, qu'est-ce qui vous attire en premier ?",
-  "أي تركيبة من هذه التناقضات تجدينها أكثر إثارة؟":
-    "Quelle combinaison de ces contrastes trouvez-vous la plus captivante ?",
-  "ما الإحساس الذي تريدين أن يمنحك إياه عطرك عندما تضعينه؟":
-    "Quelle sensation voulez-vous que votre parfum vous procure ?",
-  "هل تريدين أن يكون عطرك جزءًا من مساحتك أم أن يدخل إلى مساحة الآخرين؟":
-    "Voulez-vous que votre parfum fasse partie de votre espace ou qu'il entre dans celui des autres ?",
-  "حين تدخل الحلاوة في شيء تحبينه، أي شكل منها يجذبك؟":
-    "Quand la douceur entre dans quelque chose que vous aimez, quelle forme vous attire ?",
-  "عندما تكون الرائحة زهرية، أي إحساس تريدين أن تأتي به؟":
-    "Lorsqu'une odeur est florale, quelle sensation voulez-vous qu'elle apporte ?",
-  "لو كان عطرك شيئًا يمكنك لمسه، أي ملمس تتخيلينه؟":
-    "Si votre parfum était une chose que vous pouviez toucher, quelle texture imagineriez-vous ?",
-  "عندما تجدين عطرًا يعجبك، ماذا تفعلين عادة؟":
-    "Lorsque vous trouvez un parfum qui vous plaît, que faites-vous habituellement ?",
-  "أي صورة تشعرين أنها الأقرب إلى الطريقة التي تريدين أن يراك بها الآخرون؟":
-    "Quelle image vous semble la plus proche de la façon dont vous voulez que les autres vous voient ?",
-  "لو اختفى اسم العطر وقارورته وكل ما يعرفه الناس عنه، ماذا تريدين أن يبقى منه؟":
-    "Si le nom du parfum, son flacon et tout ce que les gens savent de lui disparaissaient, que voudriez-vous qu'il reste ?",
-
-  "أي أجواء تجذبكم من النظرة الأولى؟":
-    "Quelles ambiances vous attirent au premier regard ?",
-  "أي روائح من الحياة اليومية تجدون فيها شيئًا جميلاً؟":
-    "Quelles odeurs du quotidien trouvez-vous belles ?",
-  "ما الإحساس الذي تبحثون عنه أكثر في العطر؟":
-    "Quelle sensation recherchez-vous le plus dans un parfum ?",
-  "كيف تحبون أن يُلاحظ عطركم؟":
-    "Comment aimez-vous que votre parfum soit remarqué ?",
-  "ما الصورة التي تريدون أن يتركها عطركم؟":
-    "Quelle image voulez-vous que votre parfum laisse ?",
-  "لو كان عطركم رسالة عنكم، ماذا تريدون أن يقول؟":
-    "Si votre parfum était un message sur vous, que voudriez-vous qu'il dise ?",
-  "لو استطعتم أن تنتقلوا الآن إلى أي أجواء، ماذا تختارون؟":
-    "Si vous pouviez vous transporter maintenant dans n'importe quelle ambiance, que choisiriez-vous ?",
-  "أي أصوات يمكن أن تجعلكم تستمتعون بالمكان أكثر؟":
-    "Quels sons pourraient vous faire apprécier davantage un lieu ?",
-  "أي أجواء موسيقية أقرب إلى ذوقكم؟":
-    "Quelles ambiances musicales sont les plus proches de votre goût ?",
-  "أي إحساس تبحثون عنه أكثر في العطر؟":
-    "Quelle sensation recherchez-vous le plus dans un parfum ?",
-  "إلى أي مدى تحبون أن يصل عطركم إلى الآخرين؟":
-    "Jusqu'où aimez-vous que votre parfum parvienne aux autres ?",
-  "أي عالم من الروائح يجذبكم أكثر؟":
-    "Quel univers olfactif vous attire le plus ?",
-  "إلى أي جهة تميلون؟":
-    "Vers quel côté penchez-vous ?",
-  "أي إحساس أقرب إلى أنوفكم؟":
-    "Quelle sensation est la plus proche de votre nez ?",
-  "عندما تختارون عطرًا، أين تجدون أنفسكم؟":
-    "Lorsque vous choisissez un parfum, où vous situez-vous ?",
-
-  "اختر حتى أربعة أجواء تشعر أنك تريد الدخول إليها.":
-    "Choisissez jusqu'à quatre ambiances dans lesquelles vous voulez entrer.",
-  "اختر حتى أربعة. ليست هناك إجابة صحيحة.":
-    "Choisissez jusqu'à quatre. Il n'y a pas de bonne réponse.",
-  "اختر حتى اثنين.":
-    "Choisissez jusqu'à deux.",
-  "فكّر في الأثر الذي تريد أن يتركه العطر.":
-    "Pensez à l'impression que vous voulez laisser.",
-  "اختر الجملة التي تشعر أنها الأقرب.":
-    "Choisissez la phrase qui vous semble la plus proche.",
-  "اختر حتى أربعة أجواء تجذبك تلقائياً.":
-    "Choisissez jusqu'à quatre ambiances qui vous attirent naturellement.",
-  "اختر حتى أربعة. هذه ليست عطوراً؛ إنها إشارات إلى ذوقك الحسي.":
-    "Choisissez jusqu'à quatre. Ce ne sont pas des parfums ; ce sont des indices sur votre goût sensoriel.",
-  "اختر حتى أربعة.":
-    "Choisissez jusqu'à quatre.",
-  "اختر حتى أربعة. لا تحتاج إلى التفكير كثيراً.":
-    "Choisissez jusqu'à quatre. Pas besoin de trop réfléchir.",
-  "يمكنك اختيار اثنين.":
-    "Vous pouvez en choisir deux.",
-  "فكّر في الأثر الذي يتركه العطر في المكان.":
-    "Pensez à l'impression que le parfum laisse dans l'espace.",
-  "اختر الاتجاه الأقرب إلى أنفك.":
-    "Choisissez la direction la plus proche de votre nez.",
-  "تخيل العطر على الورق، لا شكله.":
-    "Imaginez le parfum sur papier, pas son apparence.",
-  "اختر الطريقة الأقرب إليك.":
-    "Choisissez l'approche qui vous ressemble le plus.",
-
-  "اختاري حتى ثلاثة.":
-    "Choisissez jusqu'à trois.",
-  "اختاري حتى أربعة. هذه ليست عطوراً؛ إنها إشارات إلى حواسك.":
-    "Choisissez jusqu'à quatre. Ce ne sont pas des parfums ; ce sont des indices sur vos sens.",
-  "اختاري اثنين.":
-    "Choisissez-en deux.",
-  "فكّري في الأثر الذي تريدين أن يتركه العطر.":
-    "Pensez à l'impression que vous voulez laisser.",
-  "اختاري الجملة التي تشعرين أنها الأقرب.":
-    "Choisissez la phrase qui vous semble la plus proche.",
-  "اختاري حتى أربعة.":
-    "Choisissez jusqu'à quatre.",
-  "اختاري حتى أربعة. هذه ليست عطوراً؛ إنها ذكريات.":
-    "Choisissez jusqu'à quatre. Ce ne sont pas des parfums ; ce sont des souvenirs.",
-  "اختاري اثنين. التناقضات تكشف الذوق أكثر من الإجابات المتوقعة.":
-    "Choisissez-en deux. Les contrastes révèlent le goût mieux que les réponses attendues.",
-  "اختاري ما يصف رغبتك الفعلية.":
-    "Choisissez ce qui décrit votre désir réel.",
-  "اختاري اثنين. تخيّلي الإحساس، لا الشكل.":
-    "Choisissez-en deux. Imaginez la sensation, pas la forme.",
-  "اختاري ما يشبهك فعلاً.":
-    "Choisissez ce qui vous ressemble vraiment.",
-  "هذا آخر سؤال. اختاري الجملة التي تلمس جوهر ما تبحثين عنه.":
-    "C'est la dernière question. Choisissez la phrase qui touche l'essence de ce que vous cherchez.",
-
-  "اختاروا حتى أربعة أجواء تشعرون أنكم تريدون الدخول إليها.":
-    "Choisissez jusqu'à quatre ambiances dans lesquelles vous voulez entrer.",
-  "اختاروا حتى أربعة. ليست هناك إجابة صحيحة.":
-    "Choisissez jusqu'à quatre. Il n'y a pas de bonne réponse.",
-  "اختاروا حتى اثنين.":
-    "Choisissez jusqu'à deux.",
-  "فكّروا في الأثر الذي تريدون أن يتركه العطر.":
-    "Pensez à l'impression que vous voulez laisser.",
-  "اختاروا الجملة التي تشعرون أنها الأقرب.":
-    "Choisissez la phrase qui vous semble la plus proche.",
-  "اختاروا حتى أربعة أجواء تجذبكم تلقائيًا.":
-    "Choisissez jusqu'à quatre ambiances qui vous attirent naturellement.",
-  "اختاروا حتى أربعة. هذه ليست عطورًا؛ إنها إشارات إلى ذوقكم الحسي.":
-    "Choisissez jusqu'à quatre. Ce ne sont pas des parfums ; ce sont des indices sur votre goût sensoriel.",
-  "اختاروا حتى أربعة.":
-    "Choisissez jusqu'à quatre.",
-  "اختاروا حتى أربعة. لا تحتاجون إلى التفكير كثيرًا.":
-    "Choisissez jusqu'à quatre. Pas besoin de trop réfléchir.",
-  "يمكنكم اختيار اثنين.":
-    "Vous pouvez en choisir deux.",
-  "فكّروا في الأثر الذي يتركه العطر في المكان.":
-    "Pensez à l'impression que le parfum laisse dans l'espace.",
-  "اختاروا الاتجاه الأقرب إلى أنوفكم.":
-    "Choisissez la direction la plus proche de votre nez.",
-  "تخيّلوا العطر على الورق، لا شكله.":
-    "Imaginez le parfum sur papier, pas son apparence.",
-  "اختاروا الطريقة الأقرب إليكم.":
-    "Choisissez l'approche qui vous ressemble le plus."
-};
-
-function trQ(arabicText){
-  if(!arabicText) return "";
-  if(currentLang === "ar") return arabicText;
-  return FR_QUESTIONS[arabicText] || arabicText;
-}
-
 
 /* =========================================================
    LEGACY UI_TEXT
@@ -1077,178 +1004,175 @@ const UI_TEXT = {
     restartBig: "ابدأوا تجربة جديدة"
   }
 };
-
 /* =========================================================
    CATALOGS
    ========================================================= */
 
 const CATALOGS = {
   men: [
-    { name:"Dunhill Fresh", notes:"نعناع، برغموت، ريحان، لافندر، وخشب الصندل", type:"men", vector:[88,28,48,12,22,28,55,45,42,12,88,18] },
-    { name:"Desire Blue", notes:"ليتشي، برغموت، نوتات بحرية، عنبر، ومسك", type:"men", vector:[78,82,8,25,30,30,45,48,45,5,5,20] },
-    { name:"Azzaro Chrome", notes:"ليمون، برغموت، إكليل الجبل، أناناس، وخشب الأرز", type:"men", vector:[91,35,42,20,18,28,55,52,45,8,68,15] },
-    { name:"Azzaro Pour Homme", notes:"لافندر، يانسون، ريحان، خشب الصندل، وجلد", type:"men", vector:[48,5,65,15,48,58,68,62,58,28,58,48] },
-    { name:"Azzaro Wanted", notes:"ليمون، زنجبيل، هيل، خشب العرعر، وتونكا", type:"men", vector:[62,8,52,55,58,52,62,72,65,72,22,38] },
-    { name:"Burberry Hero", notes:"برغموت، فلفل أسود، وثلاثة أنواع من أخشاب الأرز", type:"men", vector:[55,5,88,8,32,52,72,60,58,48,10,35] },
-    { name:"Bvlgari Homme Soir", notes:"شاي دارجيلنغ، برغموت، عنبر، ونبات البردي", type:"men", vector:[55,15,38,20,48,55,82,48,50,8,42,48] },
-    { name:"CK One", notes:"برغموت، هيل، أناناس، ياسمين، مسك، وعنبر", type:"men", vector:[78,25,8,25,28,30,52,42,38,25,12,15] },
-    { name:"CK Euphoria Men", notes:"زنجبيل، فلفل، ريحان أسود، أرز، وخشب الصندل", type:"men", vector:[38,5,72,12,48,58,62,60,58,78,55,42] },
-    { name:"CK Defy", notes:"برغموت، لافندر، نجيل الهند، وأرز", type:"men", vector:[70,10,65,8,25,48,70,52,52,5,55,35] },
-    { name:"212 Men", notes:"نوتات خضراء، برغموت، زنجبيل، غاردينيا، ومسك", type:"men", vector:[78,18,12,18,25,32,62,52,48,32,82,22] },
-    { name:"212 VIP Men", notes:"ليمون حامض، فلفل، زنجبيل، جين، فودكا، وجلد", type:"men", vector:[58,8,25,18,48,52,58,70,62,78,8,45] },
-    { name:"212 Sexy Men", notes:"ماندارين، برغموت، هيل، فلفل، وفانيليا", type:"men", vector:[58,5,8,62,68,48,58,65,62,68,5,38] },
-    { name:"Cartier Déclaration", notes:"برغموت، بيتيغرين، هيل، زنجبيل، وأرز", type:"men", vector:[65,5,68,8,30,52,82,55,55,58,48,48] },
-    { name:"Chanel Allure Homme Sport", notes:"أورانج، نوتات بحرية، فلفل، فانيليا، وعنبر", type:"men", vector:[72,68,18,42,48,42,78,68,62,38,5,25] },
-    { name:"Bleu de Chanel", notes:"جريب فروت، ليمون، نعناع، بخور، وأرز", type:"men", vector:[82,18,62,8,28,52,86,65,62,25,42,48] },
-    { name:"Chanel Égoïste Platinum", notes:"إكليل الجبل، لافندر، بيتيغرين، وعنبر", type:"men", vector:[62,5,35,8,42,52,88,68,65,22,72,42] },
-    { name:"Dior Homme Intense", notes:"لافندر، زهرة السوسن، مسك الروم، وأرز", type:"men", vector:[32,2,58,42,58,78,92,65,82,5,12,72] },
-    { name:"Dior Fahrenheit", notes:"جوزة الطيب، لافندر، جلد، نجيل الهند، وعنبر", type:"men", vector:[42,2,62,12,62,82,78,72,82,55,45,78] },
-    { name:"Dior Bois d'Argent", notes:"سوسن، مر، عنبر، ومسك", type:"men", vector:[28,2,42,18,62,82,95,55,78,5,5,88] },
-    { name:"Creed Aventus", notes:"أناناس، برغموت، تفاح، خشب البتولا، وعنبر الحوت", type:"men", vector:[72,5,62,28,35,62,86,72,78,18,28,48] },
-    { name:"Diesel Fuel for Life", notes:"يانسون نجمي، جريب فروت، لافندر، وتوت العليق", type:"men", vector:[62,5,5,55,42,38,45,62,55,48,18,32] },
-    { name:"Faberge Brut", notes:"لافندر، أنيس، برغموت، ياسمين، وفانيليا", type:"men", vector:[58,3,8,42,42,45,58,55,48,42,18,35] },
-    { name:"Davidoff Cool Water", notes:"نعناع، نوتات مائية، لافندر، وخشب الصندل", type:"men", vector:[88,90,35,8,18,28,58,58,52,8,52,18] },
-    { name:"MFK Baccarat Rouge 540", notes:"زعفران، ياسمين، خشب الأرز، وأمبروكسان", type:"men", vector:[38,2,55,48,62,72,88,90,92,48,3,78] },
-    { name:"Givenchy Pi", notes:"ريحان، إكليل الجبل، ماندارين، بنزوين، وفانيليا", type:"men", vector:[48,3,18,65,72,62,62,62,65,22,42,48] },
-    { name:"Armani Code", notes:"ليمون، برغموت، زهر الزيتون، أنيس، وتونكا", type:"men", vector:[55,3,12,58,62,55,78,62,65,42,18,52] },
-    { name:"Acqua Di Gio", notes:"نوتات بحرية، برغموت، إكليل الجبل، وباتشولي", type:"men", vector:[85,82,18,5,18,35,68,58,48,8,48,18] },
-    { name:"Stronger With You", notes:"هيل، فلفل وردي، ميرمية، وفانيليا كستناء", type:"men", vector:[32,2,8,82,82,62,62,78,82,65,32,42] },
-    { name:"Gucci Guilty", notes:"لافندر، ليمون، زهر البرتقال، وباتشولي", type:"men", vector:[58,3,28,18,38,45,68,58,55,12,38,35] },
-    { name:"Terre d'Hermès", notes:"برتقال، جريب فروت، فلفل، ونجيل الهند", type:"men", vector:[72,3,58,5,32,62,92,62,68,52,38,62] },
-    { name:"Hugo Boss Hugo", notes:"تفاح أخضر، لافندر، ميرمية، وأرز", type:"men", vector:[72,5,48,18,22,38,58,48,45,8,68,22] },
-    { name:"Boss Bottled", notes:"تفاح، قرفة، ماهوجني، فانيليا، وأخشاب", type:"men", vector:[45,3,58,55,65,55,72,65,62,58,8,38] },
-    { name:"JPG Ultra Male", notes:"كمثرى، لافندر، نعناع، قرفة، وفانيليا سوداء", type:"men", vector:[48,2,8,88,78,55,48,88,88,58,8,42] },
-    { name:"JPG Le Male", notes:"نعناع، لافندر، قرفة، زهر البرتقال، وفانيليا", type:"men", vector:[52,3,8,68,65,52,62,72,68,55,12,38] },
-    { name:"Lacoste L.12.12 Blanc", notes:"جريب فروت، هيل، توبيروز، وجلد سوييد", type:"men", vector:[68,5,28,18,32,38,68,48,45,42,12,32] },
-    { name:"Memo Russian Leather", notes:"ريحان، صنوبر، إكليل الجبل، وجلد", type:"men", vector:[52,2,72,5,38,68,72,62,68,18,82,68] },
-    { name:"Montblanc Legend", notes:"لافندر، برغموت، تفاح أحمر، وطحلب البلوط", type:"men", vector:[65,3,38,28,28,42,65,55,52,5,48,28] },
-    { name:"Nikos Sculpture", notes:"زهر البرتقال، ليمون، برغموت، وتونكا", type:"men", vector:[70,3,5,48,48,42,62,58,52,5,12,28] },
-    { name:"Paco Rabanne 1 Million", notes:"ماندارين، قرفة، ورد، وجلد دافئ", type:"men", vector:[48,2,18,52,72,62,62,82,78,72,3,48] },
-    { name:"Paco Rabanne Invictus", notes:"جريب فروت، نوتات بحرية، ورق الغار، وباتشولي", type:"men", vector:[78,82,18,22,28,38,55,78,72,18,35,22] },
-    { name:"Ralph Lauren Polo Blue", notes:"خيار، بطيخ، ريحان، ميرمية، ومسك", type:"men", vector:[82,58,8,18,20,28,55,48,45,5,62,15] },
-    { name:"Tom Ford Black Orchid", notes:"كمأة سوداء، أوركيد أسود، فانيليا، وبخور", type:"men", vector:[18,2,18,58,78,88,88,78,85,38,5,92] },
-    { name:"Tom Ford Bitter Peach", notes:"خوخ، برتقال دموي، رم، وفانيليا", type:"men", vector:[48,2,3,78,75,58,65,72,68,18,2,52] },
-    { name:"YSL La Nuit De L'Homme", notes:"هيل، برغموت، لافندر، وأرز", type:"men", vector:[52,3,48,18,48,52,82,52,48,68,25,58] },
-    { name:"YSL L'Homme Intense", notes:"ليمون، برغموت، فلفل أسود، وأورانج أزهار", type:"men", vector:[62,3,18,15,38,42,78,58,55,52,15,38] },
-    { name:"YSL M7", notes:"ماندارين، روزوود، عود، ونجيل الهند", type:"men", vector:[42,2,82,12,58,78,78,72,78,18,32,82] },
-    { name:"غبار ذهبي", notes:"عود نقي، مسك أبيض، عنبر ذهبي، بخور، زعفران", type:"men", vector:[12,1,82,35,88,92,82,82,90,62,2,88] },
-    { name:"مضيلة", notes:"عود نقي، مسك أبيض، عنبر ذهبي، بخور، زعفران", type:"men", vector:[15,1,78,38,85,88,80,78,88,58,2,84] },
-    { name:"كلمات", notes:"عود نقي، مسك أبيض، عنبر ذهبي، بخور، زعفران", type:"men", vector:[18,1,75,42,82,85,82,75,86,55,2,82] },
-    { name:"Paris Corner Voux Elegante", notes:"حمضيات، نعناع، لافندر، مسك أبيض، خشب الأرز", type:"men", vector:[75,15,45,10,25,38,68,55,52,5,42,22] },
-    { name:"Paris Corner Voux Zingy", notes:"زنجبيل، حمضيات، إكليل الجبل، نجيل الهند", type:"men", vector:[72,18,42,8,28,45,62,58,55,25,48,32] },
-    { name:"Paris Corner Fortnight", notes:"برغموت، أناناس، خشب البتولا، مسك، عنبر", type:"men", vector:[70,8,58,25,42,55,72,62,65,12,22,42] },
-    { name:"Fragrance World Urban Man Elixir", notes:"تفاح، قرفة، فانيليا، أخشاب، مسك", type:"men", vector:[45,3,42,62,68,55,62,68,72,42,8,38] },
-    { name:"Fragrance World Star Men Nebula", notes:"حمضيات، قرفة، خشب الأرز، عنبر، تونكا", type:"men", vector:[58,8,55,48,62,58,72,65,68,42,8,45] },
-    { name:"Fragrance World Black Leather Men", notes:"جلد، بهارات، خشب، عنبر، مسك", type:"men", vector:[25,2,72,15,62,75,72,68,78,45,5,68] },
-    { name:"Paris Corner Al Qannas", notes:"عود، زعفران، ورد، مسك، عنبر", type:"men", vector:[18,1,78,32,78,85,78,78,85,55,2,82] },
-    { name:"Paris Corner Badee Al Oud Amethyst", notes:"ورد، عود، فانيليا، مسك، عنبر", type:"men", vector:[22,2,68,55,72,78,78,75,82,32,3,72] },
-    { name:"Paris Corner His Confession", notes:"عود، خشب الصندل، بهارات، جلد، عنبر", type:"men", vector:[15,1,82,28,72,82,78,75,85,58,2,82] },
-    { name:"Fragrance World K King", notes:"عود، زعفران، ورد، مسك، عنبر", type:"men", vector:[20,1,75,38,78,82,78,78,85,52,2,78] }
+    { name:"Dunhill Fresh", notes:"نعناع، برغموت، ريحان، لافندر، وخشب الصندل", type:"men", vector:[91,8,52,27,30,49,64,57,59,12,86,36] },
+    { name:"Desire Blue", notes:"ليتشي، برغموت، نوتات بحرية، عنبر، ومسك", type:"men", vector:[78,76,38,55,42,43,54,61,57,3,22,39] },
+    { name:"Azzaro Chrome", notes:"ليمون، برغموت، إكليل الجبل، أناناس، وخشب الأرز", type:"men", vector:[89,34,62,34,31,57,69,72,69,20,47,42] },
+    { name:"Azzaro Pour Homme", notes:"لافندر، يانسون، ريحان، خشب الصندل، وجلد", type:"men", vector:[61,4,73,63,67,82,79,83,81,67,39,76] },
+    { name:"Azzaro Wanted", notes:"ليمون، زنجبيل، هيل، خشب العرعر، وتونكا", type:"men", vector:[75,2,52,68,64,65,69,84,76,55,35,57] },
+    { name:"Burberry Hero", notes:"برغموت، فلفل أسود، وثلاثة أنواع من أخشاب الأرز", type:"men", vector:[67,3,91,18,46,71,74,76,73,43,21,60] },
+    { name:"Bvlgari Homme Soir", notes:"شاي دارجيلنغ، برغموت، عنبر، ونبات البردي", type:"men", vector:[54,8,47,39,63,69,86,68,66,4,12,71] },
+    { name:"CK One", notes:"برغموت، هيل، أناناس، ياسمين، مسك، وعنبر", type:"men", vector:[91,24,57,44,34,52,68,66,62,17,81,43] },
+    { name:"CK Euphoria Men", notes:"زنجبيل، فلفل، ريحان أسود، أرز، وخشب الصندل", type:"men", vector:[48,2,69,48,67,74,65,73,72,62,28,68] },
+    { name:"CK Defy", notes:"برغموت، لافندر، نجيل الهند، وأرز", type:"men", vector:[72,4,42,32,55,53,65,63,60,0,17,48] },
+    { name:"212 Men", notes:"نوتات خضراء، برغموت، زنجبيل، غاردينيا، ومسك", type:"men", vector:[69,8,69,36,49,70,73,76,72,52,63,68] },
+    { name:"212 VIP Men", notes:"ليمون حامض، فلفل، زنجبيل، جين، فودكا، وجلد", type:"men", vector:[73,10,52,47,59,63,62,82,70,67,29,64] },
+    { name:"212 Sexy Men", notes:"ماندارين، برغموت، هيل، فلفل، وفانيليا", type:"men", vector:[67,7,66,67,62,66,71,78,72,51,48,65] },
+    { name:"Cartier Déclaration", notes:"برغموت، بيتيغرين، هيل، زنجبيل، وأرز", type:"men", vector:[68,5,72,24,58,77,83,78,76,72,42,82] },
+    { name:"Chanel Allure Homme Sport", notes:"أورانج، نوتات بحرية، فلفل، فانيليا، وعنبر", type:"men", vector:[83,61,52,62,53,57,78,81,74,25,24,54] },
+    { name:"Bleu de Chanel", notes:"جريب فروت، ليمون، نعناع، بخور، وأرز", type:"men", vector:[78,7,70,24,54,72,82,84,77,28,20,79] },
+    { name:"Chanel Égoïste Platinum", notes:"إكليل الجبل، لافندر، بيتيغرين، وعنبر", type:"men", vector:[67,5,73,23,51,72,87,82,78,9,69,69] },
+    { name:"Dior Homme Intense", notes:"لافندر، زهرة السوسن، مسك الروم، وأرز", type:"men", vector:[48,2,54,74,67,78,91,84,80,0,9,77] },
+    { name:"Dior Fahrenheit", notes:"جوزة الطيب، لافندر، جلد، نجيل الهند، وعنبر", type:"men", vector:[55,3,70,59,73,87,79,89,86,53,27,86] },
+    { name:"Dior Bois d'Argent", notes:"سوسن، مر، عنبر، ومسك", type:"men", vector:[35,2,71,70,76,88,94,86,82,0,8,91] },
+    { name:"Creed Aventus", notes:"أناناس، برغموت، تفاح، خشب البتولا، وعنبر الحوت", type:"men", vector:[82,5,65,38,48,72,82,86,84,18,39,73] },
+    { name:"Diesel Fuel for Life", notes:"يانسون نجمي، جريب فروت، لافندر، وتوت العليق", type:"men", vector:[62,2,36,61,55,54,57,71,67,31,18,55] },
+    { name:"Faberge Brut", notes:"لافندر، أنيس، برغموت، ياسمين، وفانيليا", type:"men", vector:[65,3,67,56,57,72,70,74,75,23,53,68] },
+    { name:"Davidoff Cool Water", notes:"نعناع، نوتات مائية، لافندر، وخشب الصندل", type:"men", vector:[91,82,59,18,34,57,62,79,76,18,67,49] },
+    { name:"MFK Baccarat Rouge 540", notes:"زعفران، ياسمين، خشب الأرز، وأمبروكسان", type:"men", vector:[39,3,73,75,78,86,88,95,94,54,8,96] },
+    { name:"Givenchy Pi", notes:"ريحان، إكليل الجبل، ماندارين، بنزوين، وفانيليا", type:"men", vector:[48,2,53,84,73,76,72,79,78,20,24,72] },
+    { name:"Armani Code", notes:"ليمون، برغموت، زهر الزيتون، أنيس، وتونكا", type:"men", vector:[52,2,58,63,70,69,76,82,78,18,7,78] },
+    { name:"Acqua Di Gio", notes:"نوتات بحرية، برغموت، إكليل الجبل، وباتشولي", type:"men", vector:[94,79,54,28,31,52,68,77,72,20,64,42] },
+    { name:"Stronger With You", notes:"هيل، فلفل وردي، ميرمية، وفانيليا كستناء", type:"men", vector:[36,1,17,91,86,73,68,89,86,42,12,70] },
+    { name:"Gucci Guilty", notes:"لافندر، ليمون، زهر البرتقال، وباتشولي", type:"men", vector:[61,2,59,63,58,62,69,74,69,0,18,55] },
+    { name:"Terre d'Hermès", notes:"برتقال، جريب فروت، فلفل، ونجيل الهند", type:"men", vector:[78,3,79,19,52,77,91,84,82,27,42,84] },
+    { name:"Hugo Boss Hugo", notes:"تفاح أخضر، لافندر، ميرمية، وأرز", type:"men", vector:[84,4,68,25,34,56,68,71,69,17,72,47] },
+    { name:"Boss Bottled", notes:"تفاح، قرفة، ماهوجني، فانيليا، وأخشاب", type:"men", vector:[64,2,68,67,65,71,77,82,80,48,24,68] },
+    { name:"JPG Ultra Male", notes:"كمثرى، لافندر، نعناع، قرفة، وفانيليا سوداء", type:"men", vector:[65,2,48,88,78,70,68,93,90,50,14,72] },
+    { name:"JPG Le Male", notes:"نعناع، لافندر، قرفة، زهر البرتقال، وفانيليا", type:"men", vector:[55,3,55,78,75,73,76,88,85,57,22,76] },
+    { name:"Lacoste L.12.12 Blanc", notes:"جريب فروت، هيل، توبيروز، وجلد سوييد", type:"men", vector:[76,3,63,18,40,54,70,70,68,20,24,48] },
+    { name:"Memo Russian Leather", notes:"ريحان، صنوبر، إكليل الجبل، وجلد", type:"men", vector:[55,2,86,31,63,83,79,82,84,52,72,87] },
+    { name:"Montblanc Legend", notes:"لافندر، برغموت، تفاح أحمر، وطحلب البلوط", type:"men", vector:[73,2,57,48,48,61,72,78,76,2,28,63] },
+    { name:"Nikos Sculpture", notes:"زهر البرتقال، ليمون، برغموت، وتونكا", type:"men", vector:[72,2,51,50,56,57,74,73,70,0,12,59] },
+    { name:"Paco Rabanne 1 Million", notes:"ماندارين، قرفة، ورد، وجلد دافئ", type:"men", vector:[53,2,61,62,73,72,73,91,88,67,9,78] },
+    { name:"Paco Rabanne Invictus", notes:"جريب فروت، نوتات بحرية، ورق الغار، وباتشولي", type:"men", vector:[86,78,51,32,38,56,67,84,80,5,24,49] },
+    { name:"Ralph Lauren Polo Blue", notes:"خيار، بطيخ، ريحان، ميرمية، ومسك", type:"men", vector:[84,59,55,23,33,48,65,72,68,3,51,43] },
+    { name:"Tom Ford Black Orchid", notes:"كمأة سوداء، أوركيد أسود، فانيليا، وبخور", type:"men", vector:[43,14,66,72,83,91,89,94,92,57,16,96] },
+    { name:"Tom Ford Bitter Peach", notes:"خوخ، برتقال دموي، رم، وفانيليا", type:"men", vector:[44,2,62,80,85,84,79,91,89,44,8,89] },
+    { name:"YSL La Nuit De L'Homme", notes:"هيل، برغموت، لافندر، وأرز", type:"men", vector:[58,2,55,24,64,66,77,84,76,64,17,76] },
+    { name:"YSL L'Homme Intense", notes:"ليمون، برغموت، فلفل أسود، وأورانج أزهار", type:"men", vector:[58,2,63,42,57,69,79,82,77,24,19,78] },
+    { name:"YSL M7", notes:"ماندارين، روزوود، عود، ونجيل الهند", type:"men", vector:[43,2,82,25,73,87,80,86,90,2,13,94] },
+    { name:"غبار ذهبي", notes:"عود نقي، مسك أبيض، عنبر ذهبي، بخور، زعفران", type:"men", vector:[19,2,92,32,89,95,91,96,97,78,2,98] },
+    { name:"مضيلة", notes:"عود نقي، مسك أبيض، عنبر ذهبي، بخور، زعفران", type:"men", vector:[19,2,92,32,89,95,91,96,97,78,2,98] },
+    { name:"كلمات", notes:"عود نقي، مسك أبيض، عنبر ذهبي، بخور، زعفران", type:"men", vector:[19,2,92,32,89,95,91,96,97,78,2,98] },
+    { name:"Paris Corner Voux Elegante", notes:"حمضيات، نعناع، لافندر، مسك أبيض، خشب الأرز", type:"men", vector:[82,3,43,15,23,39,61,56,55,0,31,34] },
+    { name:"Paris Corner Voux Zingy", notes:"زنجبيل، حمضيات، إكليل الجبل، نجيل الهند", type:"men", vector:[84,2,47,8,27,41,57,58,56,53,28,35] },
+    { name:"Paris Corner Fortnight", notes:"برغموت، أناناس، خشب البتولا، مسك، عنبر", type:"men", vector:[72,3,61,31,42,54,66,68,65,0,2,49] },
+    { name:"Fragrance World Urban Man Elixir", notes:"تفاح، قرفة، فانيليا، أخشاب، مسك", type:"men", vector:[64,2,67,38,62,78,79,90,87,48,18,82] },
+    { name:"Fragrance World Star Men Nebula", notes:"حمضيات، قرفة، خشب الأرز، عنبر، تونكا", type:"men", vector:[39,2,54,72,77,79,70,86,84,0,2,75] },
+    { name:"Fragrance World Black Leather Men", notes:"جلد، بهارات، خشب، عنبر، مسك", type:"men", vector:[28,1,78,30,73,76,66,82,80,62,1,78] },
+    { name:"Paris Corner Al Qannas", notes:"عود، زعفران، ورد، مسك، عنبر", type:"men", vector:[17,1,76,39,79,82,78,87,86,73,2,91] },
+    { name:"Paris Corner Badee Al Oud Amethyst", notes:"ورد، عود، فانيليا، مسك، عنبر", type:"men", vector:[25,1,72,69,73,75,76,84,83,0,2,82] },
+    { name:"Paris Corner His Confession", notes:"عود، خشب الصندل، بهارات، جلد، عنبر", type:"men", vector:[19,1,81,29,77,83,76,86,85,57,1,89] },
+    { name:"Fragrance World K King", notes:"عود، زعفران، ورد، مسك، عنبر", type:"men", vector:[17,1,76,39,79,82,78,87,86,73,2,91] }
   ],
-
   women: [
-    { name:"Avon Célèbre", notes:"سيكلامين، فواكه، فلفل، بيوني، فريزيا، ياسمين، ماغنوليا، زنبق الوادي، أرز، صندل", type:"women", vector:[55,10,45,45,40,42,65,45,45,22,25,25] },
-    { name:"Azzaro Wanted Girl", notes:"زهرة الزنجبيل، براعم البرتقال، فلفل وردي، رمان، حليب دولسي دي ليتشي، داتورا، تونكا، باتشولي، نجيل الهند", type:"women", vector:[42,5,38,72,68,55,58,65,65,42,12,35] },
-    { name:"Burberry Weekend for Women", notes:"ماندرين، مريمية، مخملية، نكتارين، ياقوتية زرقاء، زهر الخوخ، سوسن، مسك، صندل، أرز", type:"women", vector:[65,12,42,35,35,40,68,45,42,8,42,22] },
-    { name:"Burberry Brit Rhythm for Her", notes:"لافندر، فلفل وردي، نيرولي، زهر البرتقال، سوسن، توت أسود، مسك، نوتات خشبية، كومارين، أرز، نجيل الهند", type:"women", vector:[52,8,55,30,42,52,68,55,55,32,42,32] },
-    { name:"My Burberry", notes:"بازلاء حلوة، برغموت، يوسفي، جريب فروت، سفرجل، فريزيا، إبرة الراعي، خوخ، غاردينيا، ورد، باتشولي، مسك، جلود", type:"women", vector:[55,5,42,42,52,62,82,62,65,12,28,42] },
-    { name:"Burberry Her", notes:"فراولة، توت العليق، توت أسود، كرز حامض، يوسفي، بنفسج، ياسمين، مسك، فانيليا، عنبر، كشمير، باتشولي", type:"women", vector:[48,3,22,78,62,55,58,68,68,12,8,32] },
-    { name:"Bvlgari Rose Goldea", notes:"ورد، رمان، مسك، برغموت، ورد جوري، بيوني، ياسمين، خوخ، صندل، بخور، فانيليا", type:"women", vector:[48,5,42,55,52,58,82,55,62,8,10,38] },
-    { name:"Britney Spears Midnight Fantasy", notes:"برقوق، كرز حامض، توت العليق، أوركيد، سوسن، فريزيا، فانيليا، عنبر، مسك", type:"women", vector:[38,2,8,78,65,48,45,65,62,5,5,30] },
-    { name:"Britney Spears Fantasy", notes:"كيوي، ليتشي أحمر، سفرجل، شوكولاتة بيضاء، كب كيك، أوركيد، ياسمين، مسك، جذر السوسن، أخشاب", type:"women", vector:[42,3,12,88,68,52,42,75,72,8,5,28] },
-    { name:"Byredo Super Cedar", notes:"بتلات الورد، خشب الأرز الفيرجيني، نجيل الهند، مسك", type:"women", vector:[35,2,92,12,32,62,82,55,65,8,12,52] },
-    { name:"Calvin Klein Euphoria for Women", notes:"رمان، كاكي، نوتات خضراء، أوركيد أسود، لوتس، ماهوجني، عنبر، بنفسج أسود، كريمة مخفوقة", type:"women", vector:[38,8,42,58,65,72,72,65,72,25,22,68] },
-    { name:"Cacharel Amor Amor", notes:"كشمش أسود، برتقال، يوسفي، برغموت، ورد، مشمش، ياسمين، زنبق الوادي، فانيليا، تونكا، مسك، عنبر، أرز", type:"women", vector:[48,2,22,72,65,48,52,68,65,12,8,28] },
-    { name:"Cacharel Yes I Am", notes:"توت العليق، يوسفي، ليمون، برغموت، زهرة الزنجبيل، غاردينيا، ياسمين، زهر البرتقال، ورد، حليب، كراميل، فانيليا، هيل، عرقسوس، صندل", type:"women", vector:[42,2,12,88,75,58,55,72,72,32,3,32] },
-    { name:"Carolina Herrera 212 VIP", notes:"روم، باشن فروت، غاردينيا، مسك، فانيليا، تونكا", type:"women", vector:[48,3,8,75,68,52,62,72,68,18,5,32] },
-    { name:"Carolina Herrera 212 Sexy", notes:"فلفل وردي، يوسفي، برغموت، غزل البنات، غاردينيا، أزهار، ورد، فانيليا، مسك، صندل، كراميل، باتشولي", type:"women", vector:[45,2,18,82,68,52,55,70,68,22,3,30] },
-    { name:"Carolina Herrera Good Girl", notes:"لوز، قهوة، برغموت، ليمون، توبروز، ياسمين سامباك، زهر البرتقال، سوسن، ورد بلغاري، تونكا، كاكاو، فانيليا، برالين، صندل، عنبر، كشمير، باتشولي", type:"women", vector:[32,2,22,78,78,72,75,82,82,25,3,52] },
-    { name:"Carolina Herrera CH Privée", notes:"أوسمانثوس، كافيار، فلفل وردي، جلود، ورد، فانيليا، باتشولي، مسك", type:"women", vector:[35,2,42,48,68,75,82,72,78,38,5,72] },
-    { name:"Chanel Chance Eau de Parfum", notes:"فلفل وردي، ياسمين، سوسن، باتشولي، فانيليا، مسك", type:"women", vector:[42,2,28,52,62,62,82,58,68,22,8,45] },
-    { name:"Chanel No 5", notes:"ألدهيدات، يلانغ يلانغ، نيرولي، برغموت، خوخ، سوسن، ياسمين، ورد، زنبق الوادي، صندل، فانيليا، طحلب البلوط، نجيل الهند، باتشولي", type:"women", vector:[52,5,45,35,48,72,95,65,72,8,28,55] },
-    { name:"Chanel Coco Eau de Parfum", notes:"ورد بلغاري، كزبرة، خوخ، ياسمين، يوسفي، قرنفل، ورد، ميموزا، زهر البرتقال، عنبر، صندل، تونكا، أوبوبوناكس، فانيليا", type:"women", vector:[38,2,48,55,72,75,85,72,82,42,8,68] },
-    { name:"Chanel Allure Eau de Parfum", notes:"ليمون، برغموت، يوسفي، خوخ، باشن فروت، ياسمين، زنبق الماء، صفيراء، ماغنوليا، ورد، بيوني، فانيليا، صندل، عنبر، نجيل الهند", type:"women", vector:[58,12,32,42,42,52,82,55,62,5,22,38] },
-    { name:"Chanel Coco Mademoiselle", notes:"برتقال، يوسفي، برغموت، زهر البرتقال، ورد تركي، ياسمين، ميموزا، يلانغ يلانغ، باتشولي، مسك أبيض، فانيليا، نجيل الهند، تونكا", type:"women", vector:[58,5,35,45,52,62,88,72,75,12,22,48] },
-    { name:"Chanel Gabrielle", notes:"جريب فروت، يوسفي، كشمش أسود، زهر البرتقال، ياسمين، يلانغ يلانغ، توبروز، كمثرى، مسك، صندل، كشميران، سوسن", type:"women", vector:[58,5,35,42,42,55,88,62,65,5,18,38] },
-    { name:"Dior Miss Dior Chérie", notes:"فراولة برية، كرز، أناناس، يوسفي، فشار، كراميل، ورد، ياسمين، باتشولي، عنبر، مسك", type:"women", vector:[52,2,12,82,62,52,58,68,62,8,5,30] },
-    { name:"Dior Miss Dior Blooming Bouquet", notes:"يوسفي صقلي، بيوني وردي، ورد جوري، مشمش، خوخ، مسك أبيض", type:"women", vector:[62,8,8,48,32,38,78,48,48,3,22,22] },
-    { name:"Dior J'adore", notes:"كمثرى، شمام، ماغنوليا، خوخ، يوسفي، برغموت، ياسمين، زنبق الوادي، توبروز، فريزيا، ورد، أوركيد، مسك، فانيليا، توت أسود، أرز", type:"women", vector:[62,8,22,52,48,58,88,68,68,5,15,38] },
-    { name:"Dior Poison Girl", notes:"برتقال مر، ليمون، ورد جوري، وردة غراس، زهر البرتقال، فانيليا، تونكا، لوز، صندل، كشميران", type:"women", vector:[42,2,22,78,75,68,72,72,78,12,3,52] },
-    { name:"Dior Hypnotic Poison", notes:"برقوق، جوز الهند، مشمش، توبروز، ياسمين، كراوية، خشب الورد البرازيلي، ورد، فانيليا، لوز، صندل، مسك", type:"women", vector:[32,2,32,82,78,72,72,75,82,18,3,62] },
-    { name:"Dior Addict Eau de Parfum", notes:"توت أسود، أوراق اليوسفي، ياسمين، ملكة الليل، زهر البرتقال، ورد، فانيليا، تونكا، صندل", type:"women", vector:[42,2,22,72,68,62,72,68,72,8,12,48] },
-    { name:"D&G 3 L'Impératrice", notes:"كيوي، راوند، فلفل وردي، بطيخ، سيكلامين، ياسمين، ليمون، مسك، صندل", type:"women", vector:[72,15,22,42,28,35,62,48,42,8,22,18] },
-    { name:"Dolce & Gabbana The One for Women", notes:"خوخ، ليتشي، يوسفي، برغموت، زنبق أبيض، برقوق، ياسمين، زنبق الوادي، فانيليا، عنبر، مسك، نجيل الهند", type:"women", vector:[48,3,22,68,68,58,78,62,68,12,5,42] },
-    { name:"Dolce & Gabbana Rose The One", notes:"جريب فروت وردي، يوسفي، كشمش أسود، ورد، بيوني، زنبق الوادي، ليتشي، فانيليا، مسك، صندل", type:"women", vector:[58,5,22,55,48,52,78,55,62,5,15,32] },
-    { name:"Dolce & Gabbana The One Desire", notes:"ليتشي، يوسفي، برغموت، زنبق الوادي، توبروز، كراميل، فانيليا، عنبر، صندل", type:"women", vector:[45,2,18,78,72,65,75,72,72,8,3,48] },
-    { name:"Dolce & Gabbana Pour Femme", notes:"توت العليق، نيرولي، يوسفي، زهر البرتقال، ياسمين، مارشملو، فانيليا، صندل، هيليوتروب", type:"women", vector:[48,2,15,85,72,55,68,72,68,5,3,35] },
-    { name:"Dolce & Gabbana Light Blue Pour Femme", notes:"ليمون صقلي، تفاح، أرز، زهرة الجرس، خيزران، ياسمين، ورد أبيض، مسك، عنبر", type:"women", vector:[88,45,32,25,22,35,68,55,52,3,42,15] },
-    { name:"Dolce & Gabbana The One Mysterious Night", notes:"زعفران، جريب فروت، ورد، عود، مريمية، عنبر، أخشاب ثمينة، تونكا، أوبوبوناكس", type:"women", vector:[32,2,72,38,78,82,82,75,85,62,5,85] },
-    { name:"Dsquared2 Wood for Her", notes:"أوراق التوت العليق، يوسفي، ماغنوليا، زنبق الوادي، أوسمانثوس، ياسمين، أخشاب بيضاء، أرز، أمبروكسان", type:"women", vector:[62,8,62,35,32,48,72,55,58,3,42,32] },
-    { name:"Escada Magnetism", notes:"توت أحمر، كشمش أسود، ليتشي، أناناس، بطيخ، أوراق خضراء، فريزيا، ريحان، ياسمين، سوسن، ورد، فانيليا، كراميل، عنبر، باتشولي، مسك، صندل", type:"women", vector:[55,5,22,75,68,62,62,68,68,12,32,42] },
-    { name:"Escada Rockin' Rio", notes:"بابايا، أناناس، يوسفي، خوخ، بينا كولادا، قصب السكر، جوز الهند، مسك، صندل", type:"women", vector:[72,18,8,72,48,35,42,55,48,3,15,15] },
-    { name:"Escada Cherry in the Air", notes:"كرز حامض، توت العليق، يوسفي، مارشملو، فانيليا، أوركيد، غاردينيا، صندل، مسك، بلوط، جلد أبيض", type:"women", vector:[55,5,15,82,55,42,48,58,52,3,8,22] },
-    { name:"Escada Collection", notes:"برقوق، كراميل، ياسمين، زهر البرتقال، أزهار بيضاء، تونكا، صندل، عنبر، أرز", type:"women", vector:[42,2,28,78,75,62,65,65,68,12,3,45] },
-    { name:"Escada Moon Sparkle", notes:"فراولة، كشمش أسود، تفاح أحمر، حمضيات، بازلاء حلوة، فريزيا، ياسمين، ورد، توت العليق، مسك، صندل، عنبر", type:"women", vector:[62,8,12,72,48,42,52,58,52,5,15,22] },
-    { name:"Escada Signature", notes:"خيار، برغموت، كشمش أسود، ليمون، فريزيا، ماغنوليا، ياسمين، ورد، زنبق الوادي، مسك، نكتارين، عنبر، باتشولي، فانيليا", type:"women", vector:[75,22,15,42,38,48,68,52,55,3,42,25] },
-    { name:"Escada Taj Sunset", notes:"مانجو، نكتارين، برتقال أحمر، توت العليق، زنبق الماء، لوتس، جوز الهند، مسك، صندل", type:"women", vector:[68,15,10,68,48,38,48,58,52,3,12,18] },
-    { name:"Elie Saab Le Parfum", notes:"زهر البرتقال الأفريقي، ياسمين سامباك، عسل، باتشولي، ورد، أرز", type:"women", vector:[48,2,32,62,58,62,88,68,72,5,15,42] },
-    { name:"Givenchy Very Irresistible", notes:"أوراق الكشمش، لويزة، يانسون نجمي، ورد، بيوني، ماغنوليا، ورد طائفي", type:"women", vector:[58,5,15,45,42,48,75,55,58,22,32,28] },
-    { name:"Givenchy Hot Couture", notes:"توت العليق، برغموت، برتقال، فلفل أسود، نجيل الهند، ماغنوليا، صندل، عنبر، مسك", type:"women", vector:[48,2,32,62,62,55,68,62,62,42,5,42] },
-    { name:"Moschino Fresh Couture", notes:"برغموت، يوسفي، يلانغ يلانغ، بيوني، توت العليق، باتشولي أبيض، أمبروكسان، أخشاب، أرز", type:"women", vector:[78,22,32,35,28,38,68,55,52,3,32,22] },
-    { name:"Givenchy Very Irresistible Electrique Rose", notes:"توت أزرق، ليمون، ريحان، لويزة، ورد، يانسون، أوراق البنفسج، أرز، مسك", type:"women", vector:[68,8,28,42,32,42,68,55,55,12,42,25] },
-    { name:"Emporio Armani Lei / Elle", notes:"ليمون، توبروز، برغموت، كمثرى، أناناس، يوسفي، هيليوتروب، جذور السوسن، ياسمين، زنبق الوادي، صندل، فانيليا، أرز، مسك، تونكا", type:"women", vector:[68,8,28,42,38,48,78,55,58,3,22,32] },
-    { name:"Armani Sì Rose Signature", notes:"ورد مايو، ورد جوري، برغموت، يوسفي، فريزيا، كشمش أسود، سوسن، أوسمانثوس، فانيليا، باتشولي، أمبريت", type:"women", vector:[58,5,28,48,52,58,85,62,68,5,22,42] },
-    { name:"Armani Sì", notes:"براعم الكشمش الأسود، ورد مايو، فريزيا، فانيليا، باتشولي، أخشاب، أمبروكسان", type:"women", vector:[52,3,35,45,52,62,88,68,72,5,22,48] },
-    { name:"Armani Privé Rouge Malachite", notes:"توبروز، مريمية، فلفل وردي، زهر البرتقال، يلانغ يلانغ، ياسمين، كشميران، عنبر", type:"women", vector:[42,2,28,55,68,72,88,78,82,32,12,58] },
-    { name:"Flora by Gucci", notes:"بيوني، حمضيات، يوسفي، ورد، أوسمانثوس، صندل، باتشولي، فلفل وردي", type:"women", vector:[62,5,28,48,38,48,78,55,58,22,22,32] },
-    { name:"Gucci Guilty Pour Femme", notes:"فلفل وردي، يوسفي، برغموت، ليلك، خوخ، إبرة الراعي، ياسمين، كشمش أسود، باتشولي، عنبر، مسك أبيض، فانيليا", type:"women", vector:[52,3,22,55,58,58,78,65,68,28,15,42] },
-    { name:"Gucci Première", notes:"برغموت، زهر البرتقال، زهور بيضاء، مسك، جلود، نوتات خشبية", type:"women", vector:[52,2,42,38,52,62,85,62,65,8,8,52] },
-    { name:"Gucci Rush", notes:"خوخ، غاردينيا كاليفورنيا، فريزيا أفريقية، كزبرة، ورد جوري، ياسمين، باتشولي، فانيليا، نجيل الهند", type:"women", vector:[45,2,22,65,62,62,68,72,72,18,8,48] },
-    { name:"Guerlain La Petite Robe Noire", notes:"كرز حامض، لوز، توت أحمر، برغموت، عرقسوس، ورد، ورد طائفي، شاي، فانيليا، تونكا، يانسون، باتشولي، سوسن", type:"women", vector:[38,2,22,85,72,68,72,78,82,25,5,55] },
-    { name:"Guerlain Mon Guerlain", notes:"لافندر، برغموت، ياسمين سامباك، سوسن، ورد، فانيليا تاهيتي، كومارين، صندل أسترالي، جاوي", type:"women", vector:[48,2,38,55,62,62,88,65,72,8,32,48] },
-    { name:"Guerlain Insolence", notes:"بنفسج، توت العليق، توت أحمر، برغموت، ورد، زهر البرتقال، سوسن، تونكا، صموغ، صندل، مسك", type:"women", vector:[42,2,18,72,52,55,78,62,65,5,12,38] },
-    { name:"Guerlain Shalimar", notes:"حمضيات، برغموت، ليمون، أرز، يوسفي، سوسن، باتشولي، نجيل الهند، ياسمين، ورد، فانيليا، بخور، جلد، أوبوبوناكس، صندل", type:"women", vector:[32,2,42,62,78,82,88,72,82,25,8,68] },
-    { name:"Hugo Boss Hugo Woman", notes:"تفاح أخضر، سيكلامين، شمام، بابايا، خوخ، ياسمين الماء، زنبق، سوسن، أرز فيرجيني، صندل، فانيليا، عنبر", type:"women", vector:[72,18,22,55,38,42,58,55,52,3,32,22] },
-    { name:"Hugo Boss Boss Woman", notes:"مانجو، يوسفي، فريزيا، جذور البنفسج، أرز أبيض، صندل", type:"women", vector:[72,12,28,48,32,38,58,48,45,3,22,18] },
-    { name:"Hugo Boss Boss Orange Woman", notes:"تفاح أحمر، زهور بيضاء، زهر البرتقال الأفريقي، فانيليا، صندل، شجر الزيتون", type:"women", vector:[58,5,22,62,55,45,52,55,52,3,12,25] },
-    { name:"Issey Miyake L'Eau d'Issey Pure Pétale de Nectar", notes:"عسل، كمثرى، ورد، كشميران، عنبر، صندل", type:"women", vector:[48,5,28,72,62,55,72,58,62,3,8,35] },
-    { name:"I Am Juicy Couture", notes:"باشن فروت، توت العليق، جريب فروت، غاردينيا، بازلاء حلوة، هيليوتروب، ورد، عنبر، خشب الكشمير، مسك", type:"women", vector:[55,5,22,78,62,52,62,68,65,5,8,32] },
-    { name:"Viva La Juicy Bowdacious", notes:"حليب جوز الهند، شمام، كمثرى، زهرة التياري، زنبق أبيض، ياسمين، تونكا، أخشاب طافية", type:"women", vector:[58,15,15,72,55,45,52,62,58,3,8,25] },
-    { name:"Jimmy Choo Illicit", notes:"زنجبيل، برتقال مر، ورد، ياسمين سامباك، زهر البرتقال، عسل، كراميل، عنبر، فانيليا، صندل، كشمير", type:"women", vector:[42,2,22,78,72,62,68,72,75,32,3,45] },
-    { name:"Kenzo World", notes:"فواكه حمراء، بيوني، نوتات زهرية، ياسمين مصري، أمبروكسان", type:"women", vector:[58,8,15,55,42,42,72,62,58,3,12,32] },
-    { name:"Aqua Kenzo Pour Femme", notes:"أوراق التوت العليق، ماندارين، حمضيات، ماغنوليا، ورد، ياسمين، نوتات خضراء، نجيل الهند، فانيليا، خشب الكشمير، صندل، باتشولي", type:"women", vector:[75,35,28,42,38,48,72,52,55,3,42,28] },
-    { name:"Lacoste Love of Pink", notes:"باشن فروت، برتقال أحمر، ليمون، ماغنوليا وردية، ستيفانوتيس، فانيليا، أرز، مسك", type:"women", vector:[75,12,22,52,35,38,58,48,45,3,22,18] },
-    { name:"Eau de Lacoste Pour Femme", notes:"أناناس، يوسفي، برغموت، أوراق الأناناس، ياسمين سامباك، زهر البرتقال، فانيليا، صندل، بلسم بيرو، نجيل الهند", type:"women", vector:[72,8,28,48,42,48,68,55,58,3,22,28] },
-    { name:"Fragrance World French Portrait", notes:"حمضيات، فواكه، زهور بيضاء، مسك، خشب", type:"women", vector:[72,28,22,45,35,42,68,52,52,5,32,28] },
-    { name:"Fragrance World Blooming Flower", notes:"بيوني، فريزيا، ياسمين، مسك أبيض، أرز", type:"women", vector:[58,12,22,42,32,45,78,48,48,3,42,22] },
-    { name:"Fragrance World My Soulmate", notes:"فواكه حمراء، فانيليا، مسك، أخشاب", type:"women", vector:[48,3,22,72,55,48,62,58,58,8,8,28] },
-    { name:"Fragrance World Nudo Exotic Flowers", notes:"فواكه استوائية، زهور بيضاء، مسك، جوز الهند", type:"women", vector:[65,18,8,68,48,38,58,55,48,3,12,18] },
-    { name:"Fragrance World Rose Seduction", notes:"ورد، بيوني، فواكه، مسك، عنبر", type:"women", vector:[52,5,18,55,48,52,78,58,58,5,12,35] },
-    { name:"Fragrance World Giorgio Pink", notes:"فواكه، فانيليا، كراميل، مسك، عنبر", type:"women", vector:[45,2,12,78,68,52,55,68,65,8,3,32] },
-    { name:"Fragrance World Pink Dress", notes:"توت العليق، فانيليا، زهور، مسك، خشب الصندل", type:"women", vector:[48,3,18,75,58,48,58,62,58,5,8,28] },
-    { name:"Fragrance World Demure Luxe", notes:"أوركيد، فانيليا، كاكاو، مسك، عنبر", type:"women", vector:[35,2,22,78,72,62,68,68,72,5,3,45] },
-    { name:"Paris Corner Khair Pistachio", notes:"فستق، فانيليا، كراميل، مسك، عنبر", type:"women", vector:[42,2,8,82,72,55,52,65,62,8,3,32] },
-    { name:"Afnan 9pm Pour Femme", notes:"توت العليق، بنفسج، تفاح، برتقال، ورد، سوسن، بيوني، ياسمين، صنوبر، سرو، عنبر، أرز", type:"women", vector:[52,5,42,58,62,68,78,62,65,8,12,42] }
-  ],
-
-  unisex: [
-    { name:"CK One", notes:"برغموت، هيل، أناناس، ياسمين، مسك، وعنبر", type:"unisex", vector:[78,25,8,25,28,30,52,42,38,25,12,15] },
-    { name:"Dior Bois d'Argent", notes:"سوسن، مر، عنبر، ومسك", type:"unisex", vector:[28,2,42,18,62,82,95,55,78,5,5,88] },
-    { name:"MFK Baccarat Rouge 540", notes:"زعفران، ياسمين، خشب الأرز، وأمبروكسان", type:"unisex", vector:[38,2,55,48,62,72,88,90,92,48,3,78] },
-    { name:"Memo Russian Leather", notes:"ريحان، صنوبر، إكليل الجبل، وجلد", type:"unisex", vector:[52,2,72,5,38,68,72,62,68,18,82,68] },
-    { name:"Tom Ford Black Orchid", notes:"كمأة سوداء، أوركيد أسود، فانيليا، وبخور", type:"unisex", vector:[18,2,18,58,78,88,88,78,85,38,5,92] },
-    { name:"Tom Ford Bitter Peach", notes:"خوخ، برتقال دموي، رم، وفانيليا", type:"unisex", vector:[48,2,3,78,75,58,65,72,68,18,2,52] },
-    { name:"Byredo Super Cedar", notes:"بتلات الورد، خشب الأرز الفيرجيني، نجيل الهند، مسك", type:"unisex", vector:[35,2,92,12,32,62,82,55,65,8,12,52] },
-    { name:"Armani Privé Rouge Malachite", notes:"توبروز، مريمية، فلفل وردي، زهر البرتقال، يلانغ يلانغ، ياسمين، كشميران، عنبر", type:"unisex", vector:[42,2,28,55,68,72,88,78,82,32,12,58] },
-    { name:"Paris Corner Voux Elegante", notes:"حمضيات، نعناع، لافندر، مسك أبيض، خشب الأرز", type:"unisex", vector:[75,15,45,10,25,38,68,55,52,5,42,22] },
-    { name:"Paris Corner Voux Zingy", notes:"زنجبيل، حمضيات، إكليل الجبل، نجيل الهند", type:"unisex", vector:[72,18,42,8,28,45,62,58,55,25,48,32] },
-    { name:"Paris Corner Badee Al Oud Amethyst", notes:"ورد، عود، فانيليا، مسك، عنبر", type:"unisex", vector:[22,2,68,55,72,78,78,75,82,32,3,72] },
-    { name:"Fragrance World French Portrait", notes:"حمضيات، فواكه، زهور بيضاء، مسك، خشب", type:"unisex", vector:[72,28,22,45,35,42,68,52,52,5,32,28] },
-    { name:"Fragrance World Nudo Exotic Flowers", notes:"فواكه استوائية، زهور بيضاء، مسك، جوز الهند", type:"unisex", vector:[65,18,8,68,48,38,58,55,48,3,12,18] },
-    { name:"Paris Corner Khair Pistachio", notes:"فستق، فانيليا، كراميل، مسك، عنبر", type:"unisex", vector:[42,2,8,82,72,55,52,65,62,8,3,32] },
-    { name:"Bvlgari Aqva Pour Homme", notes:"مائية، برغموت، إكليل الجبل، نعناع، عنبر", type:"unisex", vector:[88,92,15,5,22,32,65,58,52,8,32,18] },
-    { name:"Comme des Garçons Avignon", notes:"بخور، لباب، ميرمية، شمع الكنيسة، صندل", type:"unisex", vector:[12,2,55,5,62,88,78,68,82,25,12,88] },
-    { name:"Tom Ford Tobacco Vanille", notes:"تبغ، فانيليا، توابل، كاكاو، فواكه مجففة", type:"unisex", vector:[20,2,45,85,85,75,70,78,85,55,3,50] }
+  { name:"Avon Célèbre", notes:"سيكلامين، فواكه، فلفل، بيوني، فريزيا، ياسمين، ماغنوليا، زنبق الوادي، أرز، صندل", type:"women", vector:[82,3,48,28,25,43,68,58,55,12,22,38] },
+  { name:"Azzaro Wanted Girl", notes:"زهرة الزنجبيل، براعم البرتقال، فلفل وردي، رمان، حليب دولسي دي ليتشي، داتورا، تونكا، باتشولي، نجيل الهند", type:"women", vector:[61,2,45,82,68,69,72,84,80,35,8,71] },
+  { name:"Burberry Weekend for Women", notes:"ماندرين، مريمية، مخملية، نكتارين، ياقوتية زرقاء، زهر الخوخ، سوسن، مسك، صندل، أرز", type:"women", vector:[72,4,53,45,35,52,73,65,61,3,51,49] },
+  { name:"Burberry Brit Rhythm for Her", notes:"لافندر، فلفل وردي، نيرولي، زهر البرتقال، سوسن، توت أسود، مسك، نوتات خشبية، كومارين، أرز، نجيل الهند", type:"women", vector:[67,3,65,25,38,58,72,68,65,25,32,54] },
+  { name:"My Burberry", notes:"بازلاء حلوة، برغموت، يوسفي، جريب فروت، سفرجل، فريزيا، إبرة الراعي، خوخ، غاردينيا، ورد، باتشولي، مسك، جلود", type:"women", vector:[76,3,38,39,36,52,81,73,69,4,53,55] },
+  { name:"Burberry Her", notes:"فراولة، توت العليق، توت أسود، كرز حامض، يوسفي، بنفسج، ياسمين، مسك، فانيليا، عنبر، كشمير، باتشولي", type:"women", vector:[69,2,40,81,63,68,75,86,82,2,13,70] },
+  { name:"Bvlgari Rose Goldea", notes:"ورد، رمان، مسك، برغموت، ورد جوري، بيوني، ياسمين، خوخ، صندل، بخور، فانيليا", type:"women", vector:[58,3,45,59,54,62,83,76,71,8,7,65] },
+  { name:"Britney Spears Midnight Fantasy", notes:"برقوق، كرز حامض، توت العليق، أوركيد، سوسن، فريزيا، فانيليا، عنبر، مسك", type:"women", vector:[43,2,9,82,70,69,63,78,76,0,2,79] },
+  { name:"Britney Spears Fantasy", notes:"كيوي، ليتشي أحمر، سفرجل، شوكولاتة بيضاء، كب كيك، أوركيد، ياسمين، مسك، جذر السوسن، أخشاب", type:"women", vector:[62,2,25,94,69,67,67,83,79,0,2,65] },
+  { name:"Byredo Super Cedar", notes:"بتلات الورد، خشب الأرز الفيرجيني، نجيل الهند، مسك", type:"women", vector:[43,2,92,13,28,54,84,61,57,0,8,58] },
+  { name:"Calvin Klein Euphoria for Women", notes:"رمان، كاكي، نوتات خضراء، أوركيد أسود، لوتس، ماهوجني، عنبر، بنفسج أسود، كريمة مخفوقة", type:"women", vector:[48,3,73,65,72,77,75,83,79,2,28,85] },
+  { name:"Cacharel Amor Amor", notes:"كشمش أسود، برتقال، يوسفي، برغموت، ورد، مشمش، ياسمين، زنبق الوادي، فانيليا، تونكا، مسك، عنبر، أرز", type:"women", vector:[79,3,45,63,53,61,69,79,74,13,10,56] },
+  { name:"Cacharel Yes I Am", notes:"توت العليق، يوسفي، ليمون، برغموت، زهرة الزنجبيل، غاردينيا، ياسمين، زهر البرتقال، ورد، حليب، كراميل، فانيليا، هيل، عرقسوس، صندل", type:"women", vector:[65,2,51,89,76,76,72,88,84,49,5,77] },
+  { name:"Carolina Herrera 212 VIP", notes:"روم، باشن فروت، غاردينيا، مسك، فانيليا، تونكا", type:"women", vector:[48,2,16,77,76,68,74,84,78,0,2,73] },
+  { name:"Carolina Herrera 212 Sexy", notes:"فلفل وردي، يوسفي، برغموت، غزل البنات، غاردينيا، أزهار، ورد، فانيليا، مسك، صندل، كراميل، باتشولي", type:"women", vector:[62,2,52,84,67,68,73,84,80,31,7,72] },
+  { name:"Carolina Herrera Good Girl", notes:"لوز، قهوة، برغموت، ليمون، توبروز، ياسمين سامباك، زهر البرتقال، سوسن، ورد بلغاري، تونكا، كاكاو، فانيليا، برالين، صندل، عنبر، كشمير، باتشولي", type:"women", vector:[49,2,67,91,80,84,79,94,90,42,5,87] },
+  { name:"Carolina Herrera CH Privée", notes:"أوسمانثوس، كافيار، فلفل وردي، جلود، ورد، فانيليا، باتشولي، مسك", type:"women", vector:[31,2,48,65,70,73,77,79,75,37,2,85] },
+  { name:"Chanel Chance Eau de Parfum", notes:"فلفل وردي، ياسمين، سوسن، باتشولي، فانيليا، مسك", type:"women", vector:[34,2,46,45,48,70,88,80,78,39,2,82] },
+  { name:"Chanel No 5", notes:"ألدهيدات، يلانغ يلانغ، نيرولي، برغموت، خوخ، سوسن، ياسمين، ورد، زنبق الوادي، صندل، فانيليا، طحلب البلوط، نجيل الهند، باتشولي", type:"women", vector:[66,3,69,43,51,78,96,91,87,2,16,90] },
+  { name:"Chanel Coco Eau de Parfum", notes:"ورد بلغاري، كزبرة، خوخ، ياسمين، يوسفي، قرنفل، ورد، ميموزا، زهر البرتقال، عنبر، صندل، تونكا، أوبوبوناكس، فانيليا", type:"women", vector:[36,2,67,66,78,86,91,90,86,76,9,91] },
+  { name:"Chanel Allure Eau de Parfum", notes:"ليمون، برغموت، يوسفي، خوخ، باشن فروت، ياسمين، زنبق الماء، صفيراء، ماغنوليا، ورد، بيوني، فانيليا، صندل، عنبر، نجيل الهند", type:"women", vector:[83,20,57,46,44,61,86,79,75,0,8,59] },
+  { name:"Chanel Coco Mademoiselle", notes:"برتقال، يوسفي، برغموت، زهر البرتقال، ورد تركي، ياسمين، ميموزا، يلانغ يلانغ، باتشولي، مسك أبيض، فانيليا، نجيل الهند، تونكا", type:"women", vector:[84,3,62,38,48,70,91,87,84,8,14,77] },
+  { name:"Chanel Gabrielle", notes:"جريب فروت، يوسفي، كشمش أسود، زهر البرتقال، ياسمين، يلانغ يلانغ، توبروز، كمثرى، مسك، صندل، كشميران، سوسن", type:"women", vector:[76,3,54,49,43,58,87,80,75,2,14,62] },
+  { name:"Dior Miss Dior Chérie", notes:"فراولة برية، كرز، أناناس، يوسفي، فشار، كراميل، ورد، ياسمين، باتشولي، عنبر، مسك", type:"women", vector:[67,2,53,77,62,68,74,82,78,0,4,67] },
+  { name:"Dior Miss Dior Blooming Bouquet", notes:"يوسفي صقلي، بيوني وردي، ورد جوري، مشمش، خوخ، مسك أبيض", type:"women", vector:[79,2,8,36,27,39,84,67,60,0,4,40] },
+  { name:"Dior J'adore", notes:"كمثرى، شمام، ماغنوليا، خوخ، يوسفي، برغموت، ياسمين، زنبق الوادي، توبروز، فريزيا، ورد، أوركيد، مسك، فانيليا، توت أسود، أرز", type:"women", vector:[77,4,45,51,38,54,91,82,76,0,3,48] },
+  { name:"Dior Poison Girl", notes:"برتقال مر، ليمون، ورد جوري، وردة غراس، زهر البرتقال، فانيليا، تونكا، لوز، صندل، كشميران", type:"women", vector:[52,2,54,86,77,78,78,90,87,11,2,82] },
+  { name:"Dior Hypnotic Poison", notes:"برقوق، جوز الهند، مشمش، توبروز، ياسمين، كراوية، خشب الورد البرازيلي، ورد، فانيليا، لوز، صندل، مسك", type:"women", vector:[31,2,62,88,85,82,76,91,89,34,2,89] },
+  { name:"Dior Addict Eau de Parfum", notes:"توت أسود، أوراق اليوسفي، ياسمين، ملكة الليل، زهر البرتقال، ورد، فانيليا، تونكا، صندل", type:"women", vector:[45,2,57,85,78,79,80,91,88,0,3,86] },
+  { name:"D&G 3 L'Impératrice", notes:"كيوي، راوند، فلفل وردي، بطيخ، سيكلامين، ياسمين، ليمون، مسك، صندل", type:"women", vector:[91,72,43,38,27,43,65,68,62,17,62,42] },
+  { name:"Dolce & Gabbana The One for Women", notes:"خوخ، ليتشي، يوسفي، برغموت، زنبق أبيض، برقوق، ياسمين، زنبق الوادي، فانيليا، عنبر، مسك، نجيل الهند", type:"women", vector:[63,3,51,70,67,69,81,87,82,8,8,76] },
+  { name:"Dolce & Gabbana Rose The One", notes:"جريب فروت وردي، يوسفي، كشمش أسود، ورد، بيوني، زنبق الوادي، ليتشي، فانيليا، مسك، صندل", type:"women", vector:[76,3,48,51,43,57,82,78,74,4,9,65] },
+  { name:"Dolce & Gabbana The One Desire", notes:"ليتشي، يوسفي، برغموت، زنبق الوادي، توبروز، كراميل، فانيليا، عنبر، صندل", type:"women", vector:[55,2,49,87,77,75,78,88,84,2,5,79] },
+  { name:"Dolce & Gabbana Pour Femme", notes:"توت العليق، نيرولي، يوسفي، زهر البرتقال، ياسمين، مارشملو، فانيليا، صندل، هيليوتروب", type:"women", vector:[69,3,49,88,72,67,77,86,82,0,4,70] },
+  { name:"Dolce & Gabbana Light Blue Pour Femme", notes:"ليمون صقلي، تفاح، أرز، زهرة الجرس، خيزران، ياسمين، ورد أبيض، مسك، عنبر", type:"women", vector:[93,16,77,17,29,49,71,72,67,0,74,42] },
+  { name:"Dolce & Gabbana The One Mysterious Night", notes:"زعفران، جريب فروت، ورد، عود، مريمية، عنبر، أخشاب ثمينة، تونكا، أوبوبوناكس", type:"women", vector:[32,1,89,53,87,91,86,94,91,86,21,97] },
+  { name:"Dsquared2 Wood for Her", notes:"أوراق التوت العليق، يوسفي، ماغنوليا، زنبق الوادي، أوسمانثوس، ياسمين، أخشاب بيضاء، أرز، أمبروكسان", type:"women", vector:[76,3,85,22,31,55,81,70,68,0,43,57] },
+  { name:"Escada Magnetism", notes:"توت أحمر، كشمش أسود، ليتشي، أناناس، بطيخ، أوراق خضراء، فريزيا، ريحان، ياسمين، سوسن، ورد، فانيليا، كراميل، عنبر، باتشولي، مسك، صندل", type:"women", vector:[55,2,65,85,73,78,72,88,84,42,58,82] },
+  { name:"Escada Rockin' Rio", notes:"بابايا، أناناس، يوسفي، خوخ، بينا كولادا، قصب السكر، جوز الهند، مسك، صندل", type:"women", vector:[81,16,42,76,48,46,64,76,61,0,15,51] },
+  { name:"Escada Cherry in the Air", notes:"كرز حامض، توت العليق، يوسفي، مارشملو، فانيليا، أوركيد، غاردينيا، صندل، مسك، بلوط، جلد أبيض", type:"women", vector:[67,2,52,88,61,61,70,79,68,0,3,70] },
+  { name:"Escada Collection", notes:"برقوق، كراميل، ياسمين، زهر البرتقال، أزهار بيضاء، تونكا، صندل، عنبر، أرز", type:"women", vector:[34,1,66,88,78,78,82,83,81,8,2,78] },
+  { name:"Escada Moon Sparkle", notes:"فراولة، كشمش أسود، تفاح أحمر، حمضيات، بازلاء حلوة، فريزيا، ياسمين، ورد، توت العليق، مسك، صندل، عنبر", type:"women", vector:[82,8,49,70,43,51,70,76,68,0,8,52] },
+  { name:"Escada Signature", notes:"خيار، برغموت، كشمش أسود، ليمون، فريزيا، ماغنوليا، ياسمين، ورد، زنبق الوادي، مسك، نكتارين، عنبر، باتشولي، فانيليا", type:"women", vector:[88,35,62,38,39,57,82,76,82,8,81,67] },
+  { name:"Escada Taj Sunset", notes:"مانجو، نكتارين، برتقال أحمر، توت العليق، زنبق الماء، لوتس، جوز الهند، مسك، صندل", type:"women", vector:[84,27,47,67,44,49,66,75,65,0,3,48] },
+  { name:"Elie Saab Le Parfum", notes:"زهر البرتقال الأفريقي، ياسمين سامباك، عسل، باتشولي، ورد، أرز", type:"women", vector:[45,10,40,80,70,75,92,85,85,15,20,30] },
+  { name:"Givenchy Very Irresistible", notes:"أوراق الكشمش، لويزة، يانسون نجمي، ورد، بيوني، ماغنوليا، ورد طائفي", type:"women", vector:[60,20,25,65,45,55,82,75,78,40,35,35] },
+  { name:"Givenchy Hot Couture", notes:"توت العليق، برغموت، برتقال، فلفل أسود، نجيل الهند، ماغنوليا، صندل، عنبر، مسك", type:"women", vector:[35,0,45,78,75,78,80,82,82,60,10,50] },
+  { name:"Moschino Fresh Couture", notes:"برغموت، يوسفي، يلانغ يلانغ، بيوني، توت العليق، باتشولي أبيض، أمبروكسان، أخشاب، أرز", type:"women", vector:[85,40,35,40,25,35,65,60,65,10,30,15] },
+  { name:"Givenchy Very Irresistible Electrique Rose", notes:"توت أزرق، ليمون، ريحان، لويزة، ورد، يانسون، أوراق البنفسج، أرز، مسك", type:"women", vector:[78,30,30,45,25,40,75,65,70,30,65,30] },
+  { name:"Emporio Armani Lei / Elle", notes:"ليمون، توبروز، برغموت، كمثرى، أناناس، يوسفي، هيليوتروب، جذور السوسن، ياسمين، زنبق الوادي، صندل، فانيليا، أرز، مسك، تونكا", type:"women", vector:[50,10,55,60,75,70,85,72,78,20,15,45] },
+  { name:"Armani Sì Rose Signature", notes:"ورد مايو، ورد جوري، برغموت، يوسفي، فريزيا، كشمش أسود، سوسن، أوسمانثوس، فانيليا، باتشولي، أمبريت", type:"women", vector:[55,15,35,72,60,65,88,75,78,15,25,30] },
+  { name:"Armani Sì", notes:"براعم الكشمش الأسود، ورد مايو، فريزيا، فانيليا، باتشولي، أخشاب، أمبروكسان", type:"women", vector:[40,10,50,85,70,78,90,88,85,10,15,40] },
+  { name:"Armani Privé Rouge Malachite", notes:"توبروز، مريمية، فلفل وردي، زهر البرتقال، يلانغ يلانغ، ياسمين، كشميران، عنبر", type:"women", vector:[30,5,50,65,85,90,95,92,92,45,15,80] },
+  { name:"Flora by Gucci", notes:"بيوني، حمضيات، يوسفي، ورد، أوسمانثوس، صندل، باتشولي، فلفل وردي", type:"women", vector:[65,15,35,60,40,50,80,70,72,25,30,25] },
+  { name:"Gucci Guilty Pour Femme", notes:"فلفل وردي، يوسفي، برغموت، ليلك، خوخ، إبرة الراعي، ياسمين، كشمش أسود، باتشولي، عنبر، مسك أبيض، فانيليا", type:"women", vector:[45,10,45,68,65,72,85,80,80,50,20,55] },
+  { name:"Gucci Première", notes:"برغموت، زهر البرتقال، زهور بيضاء، مسك، جلود، نوتات خشبية", type:"women", vector:[55,15,60,45,60,65,88,72,75,15,10,45] },
+  { name:"Gucci Rush", notes:"خوخ، غاردينيا كاليفورنيا، فريزيا أفريقية، كزبرة، ورد جوري، ياسمين، باتشولي، فانيليا، نجيل الهند", type:"women", vector:[25,0,45,82,80,85,78,95,90,40,15,75] },
+  { name:"Guerlain La Petite Robe Noire", notes:"كرز حامض، لوز، توت أحمر، برغموت، عرقسوس، ورد، ورد طائفي، شاي، فانيليا، تونكا، يانسون، باتشولي، سوسن", type:"women", vector:[40,5,35,88,72,80,84,85,82,35,10,60] },
+  { name:"Guerlain Mon Guerlain", notes:"لافندر، برغموت، ياسمين سامباك، سوسن، ورد، فانيليا تاهيتي، كومارين، صندل أسترالي، جاوي", type:"women", vector:[55,10,45,75,78,75,92,82,82,25,20,40] },
+  { name:"Guerlain Insolence", notes:"بنفسج، توت العليق، توت أحمر، برغموت، ورد، زهر البرتقال، سوسن، تونكا، صموغ، صندل، مسك", type:"women", vector:[40,0,35,80,65,75,88,90,88,15,15,55] },
+  { name:"Guerlain Shalimar", notes:"حمضيات، برغموت، ليمون، أرز، يوسفي، سوسن، باتشولي، نجيل الهند، ياسمين، ورد، فانيليا، بخور، جلد، أوبوبوناكس، صندل", type:"women", vector:[35,0,50,70,95,95,95,95,92,55,10,90] },
+  { name:"Hugo Boss Hugo Woman", notes:"تفاح أخضر، سيكلامين، شمام، بابايا، خوخ، ياسمين الماء، زنبق، سوسن، أرز فيرجيني، صندل، فانيليا، عنبر", type:"women", vector:[80,50,30,50,25,35,70,65,68,10,35,20] },
+  { name:"Hugo Boss Boss Woman", notes:"مانجو، يوسفي، فريزيا، جذور البنفسج، أرز أبيض، صندل", type:"women", vector:[70,20,45,55,35,40,78,68,70,10,20,25] },
+  { name:"Hugo Boss Boss Orange Woman", notes:"تفاح أحمر، زهور بيضاء، زهر البرتقال الأفريقي، فانيليا، صندل، شجر الزيتون", type:"women", vector:[60,10,40,75,60,50,75,70,72,15,10,20] },
+  { name:"Issey Miyake L'Eau d'Issey Pure Pétale de Nectar", notes:"عسل، كمثرى، ورد، كشميران، عنبر، صندل", type:"women", vector:[55,35,40,78,55,60,82,75,78,10,15,30] },
+  { name:"I Am Juicy Couture", notes:"باشن فروت، توت العليق، جريب فروت، غاردينيا، بازلاء حلوة، هيليوتروب، ورد، عنبر، خشب الكشمير، مسك", type:"women", vector:[65,15,30,85,45,45,68,78,75,10,10,25] },
+  { name:"Viva La Juicy Bowdacious", notes:"حليب جوز الهند، شمام، كمثرى، زهرة التياري، زنبق أبيض، ياسمين، تونكا، أخشاب طافية", type:"women", vector:[60,30,35,88,55,45,65,75,72,5,10,20] },
+  { name:"Jimmy Choo Illicit", notes:"زنجبيل، برتقال مر، ورد، ياسمين سامباك، زهر البرتقال، عسل، كراميل، عنبر، فانيليا، صندل، كشمير", type:"women", vector:[35,0,45,88,85,80,82,85,82,45,5,50] },
+  { name:"Kenzo World", notes:"فواكه حمراء، بيوني، نوتات زهرية، ياسمين مصري، أمبروكسان", type:"women", vector:[60,20,35,65,40,55,78,80,78,15,15,40] },
+  { name:"Aqua Kenzo Pour Femme", notes:"أوراق التوت العليق، ماندارين، حمضيات، ماغنوليا، ورد، ياسمين، نوتات خضراء، نجيل الهند، فانيليا، خشب الكشمير، صندل، باتشولي", type:"women", vector:[85,65,35,45,30,40,75,70,72,10,50,25] },
+  { name:"Lacoste Love of Pink", notes:"باشن فروت، برتقال أحمر، ليمون، ماغنوليا وردية، ستيفانوتيس، فانيليا، أرز، مسك", type:"women", vector:[78,25,25,70,30,30,68,60,62,10,15,15] },
+  { name:"Eau de Lacoste Pour Femme", notes:"أناناس، يوسفي، برغموت، أوراق الأناناس، ياسمين سامباك، زهر البرتقال، فانيليا، صندل، بلسم بيرو، نجيل الهند", type:"women", vector:[75,20,35,72,45,45,78,68,70,10,15,20] },
+  { name:"Fragrance World French Portrait", notes:"حمضيات، فواكه، زهور بيضاء، مسك، خشب", type:"women", vector:[70,20,40,60,40,45,72,65,68,10,15,25] },
+  { name:"Fragrance World Blooming Flower", notes:"بيوني، فريزيا، ياسمين، مسك أبيض، أرز", type:"women", vector:[80,30,30,55,25,35,75,62,65,5,25,15] },
+  { name:"Fragrance World My Soulmate", notes:"فواكه حمراء، فانيليا، مسك، أخشاب", type:"women", vector:[65,15,40,75,55,50,72,70,70,10,10,25] },
+  { name:"Fragrance World Nudo Exotic Flowers", notes:"فواكه استوائية، زهور بيضاء، مسك، جوز الهند", type:"women", vector:[70,25,25,82,50,45,68,75,72,5,10,20] },
+  { name:"Fragrance World Rose Seduction", notes:"ورد، بيوني، فواكه، مسك، عنبر", type:"women", vector:[60,15,30,70,45,45,75,72,70,10,15,25] },
+  { name:"Fragrance World Giorgio Pink", notes:"فواكه، فانيليا، كراميل، مسك، عنبر", type:"women", vector:[50,10,25,88,65,50,65,80,75,5,5,20] },
+  { name:"Fragrance World Pink Dress", notes:"توت العليق، فانيليا، زهور، مسك، خشب الصندل", type:"women", vector:[65,15,35,80,55,45,70,72,70,5,10,20] },
+  { name:"Fragrance World Demure Luxe", notes:"أوركيد، فانيليا، كاكاو، مسك، عنبر", type:"women", vector:[30,0,35,85,82,75,80,82,80,20,5,55] },
+  { name:"Paris Corner Khair Pistachio", notes:"فستق، فانيليا، كراميل، مسك، عنبر", type:"women", vector:[35,0,30,92,80,65,78,88,85,15,5,40] },
+  { name:"Afnan 9pm Pour Femme", notes:"توت العليق، بنفسج، تفاح، برتقال، ورد، سوسن، بيوني، ياسمين، صنوبر، سرو، عنبر، أرز", type:"women", vector:[60,10,50,72,60,65,82,82,82,15,35,45] }
+],
+    unisex: [
+    { name:"CK One", notes:"برغموت، هيل، أناناس، ياسمين، مسك، وعنبر", type:"unisex", vector:[85,35,30,35,25,30,75,55,60,15,25,15] },
+    { name:"Dior Bois d'Argent", notes:"سوسن، مر، عنبر، ومسك", type:"unisex", vector:[40,0,55,50,80,85,95,80,82,25,10,70] },
+    { name:"MFK Baccarat Rouge 540", notes:"زعفران، ياسمين، خشب الأرز، وأمبروكسان", type:"unisex", vector:[35,0,50,85,80,85,95,98,95,40,0,75] },
+    { name:"Memo Russian Leather", notes:"ريحان، صنوبر، إكليل الجبل، وجلد", type:"unisex", vector:[50,10,60,15,75,85,90,88,88,35,65,75] },
+    { name:"Tom Ford Black Orchid", notes:"كمأة سوداء، أوركيد أسود، فانيليا، وبخور", type:"unisex", vector:[25,0,50,80,88,92,90,95,92,45,10,88] },
+    { name:"Tom Ford Bitter Peach", notes:"خوخ، برتقال دموي، رم، وفانيليا", type:"unisex", vector:[45,5,35,88,80,75,85,90,88,35,10,55] },
+    { name:"Byredo Super Cedar", notes:"بتلات الورد، خشب الأرز الفيرجيني، نجيل الهند، مسك", type:"unisex", vector:[60,15,85,20,45,55,88,68,72,15,20,35] },
+    { name:"Armani Privé Rouge Malachite", notes:"توبروز، مريمية، فلفل وردي، زهر البرتقال، يلانغ يلانغ، ياسمين، كشميران، عنبر", type:"unisex", vector:[30,5,50,65,85,90,95,92,92,45,15,80] },
+    { name:"Paris Corner Voux Elegante", notes:"حمضيات، نعناع، لافندر، مسك أبيض، خشب الأرز", type:"unisex", vector:[80,25,45,30,30,35,78,70,70,15,30,20] },
+    { name:"Paris Corner Voux Zingy", notes:"زنجبيل، حمضيات، إكليل الجبل، نجيل الهند", type:"unisex", vector:[85,20,40,25,35,40,75,72,72,55,35,25] },
+    { name:"Paris Corner Badee Al Oud Amethyst", notes:"ورد، عود، فانيليا، مسك، عنبر", type:"unisex", vector:[20,0,75,70,90,92,85,92,90,40,5,80] },
+    { name:"Fragrance World French Portrait", notes:"حمضيات، فواكه، زهور بيضاء، مسك، خشب", type:"unisex", vector:[70,20,40,60,40,45,72,65,68,10,15,25] },
+    { name:"Fragrance World Nudo Exotic Flowers", notes:"فواكه استوائية، زهور بيضاء، مسك، جوز الهند", type:"unisex", vector:[70,25,25,82,50,45,68,75,72,5,10,20] },
+    { name:"Paris Corner Khair Pistachio", notes:"فستق، فانيليا، كراميل، مسك، عنبر", type:"unisex", vector:[35,0,30,92,80,65,78,88,85,15,5,40] },
+    { name:"Bvlgari Aqva Pour Homme", notes:"مائية، برغموت، إكليل الجبل، نعناع، عنبر", type:"unisex", vector:[85,90,30,20,25,45,80,78,78,15,20,30] },
+    { name:"Comme des Garçons Avignon", notes:"بخور، لباب، ميرمية، شمع الكنيسة، صندل", type:"unisex", vector:[20,0,65,15,85,95,88,85,85,40,15,95] },
+    { name:"Tom Ford Tobacco Vanille", notes:"تبغ، فانيليا، توابل، كاكاو، فواكه مجففة", type:"unisex", vector:[20,0,45,90,98,92,92,98,95,75,0,70] }
   ]
 };
 
@@ -1379,7 +1303,6 @@ const messageOptions = [
 ["أريد عطراً له حضور",[0,0,3,2,8,7,8,24,15,5,0,8]],
 ["أريد شيئاً مختلفاً عن المعتاد",[0,0,10,5,8,16,6,15,8,5,0,24]]
 ];
-
 /* =========================================================
    WOMEN QUESTION VECTORS
    ========================================================= */
@@ -1396,7 +1319,7 @@ const womenAtmosphereOptions = [
 ];
 
 const womenScentOptions = [
-["وردة قُطفت للتو",[3,0,3,8,8,8,20,5,5,0,5,3]],
+["وردة قُطفت للتو",[3,0,3,8,8,15,25,8,5,0,10,5]],
 ["فاكهة ناضجة وحلوة",[12,3,0,22,8,3,5,8,5,0,3,0]],
 ["قهوة وحلوى في مكان دافئ",[-3,0,0,22,20,12,5,5,8,8,0,5]],
 ["ملابس نظيفة خرجت من الخزانة",[20,3,0,0,-3,-5,10,0,2,0,5,-3]],
@@ -1656,12 +1579,13 @@ let current = 0;
 let answers = [];
 let profile = Array(12).fill(50);
 
-const ENGINE_VERSION = "V9.4.2";
+const ENGINE_VERSION = "V9.7-D-clean";
 let currentRecommendations = [];
 let sessionCustomerId = null;
 
 let _currentCustomerCache = null;
 let _currentTestsCache = [];
+
 /* =========================================================
    UTILITIES
    ========================================================= */
@@ -1683,18 +1607,15 @@ function getAllPerfumes(){
   return CATALOGS[selectedCatalog] || [];
 }
 
-
 /* =========================================================
    STORAGE MANAGER
    ========================================================= */
 
 const StorageManager = (function(){
-
   const DB_NAME = "perfume_fingerprint_db";
   const DB_VERSION = 1;
   const STORE_CUSTOMERS = "customers";
   const STORE_TESTS = "tests";
-
   let dbPromise = null;
 
   function openDB(){
@@ -1837,9 +1758,7 @@ const StorageManager = (function(){
     saveTest: saveTest,
     getTestsByCustomer: getTestsByCustomer
   };
-
 })();
-
 
 /* =========================================================
    SAVE TEST RESULT
@@ -1889,7 +1808,6 @@ function saveTestResult(opts){
   }
 }
 
-
 /* =========================================================
    MODAL HELPERS
    ========================================================= */
@@ -1909,7 +1827,6 @@ function hideModal(){
 function closeModalOnBackdrop(event){
   if(event.target === document.getElementById("modalOverlay")) hideModal();
 }
-
 
 /* =========================================================
    SAVE / RETRIEVE DIALOGS
@@ -2034,7 +1951,6 @@ function openRetrieveDialog(){
   );
 }
 
-/* ===== V9.4 — doRetrieve يقبل customerId كوسيط اختياري ===== */
 function doRetrieve(customerId){
   let id;
   if(customerId && typeof customerId === "string"){
@@ -2101,7 +2017,6 @@ function doDelete(customerId){
   });
 }
 
-
 /* =========================================================
    DATE & LABEL HELPERS
    ========================================================= */
@@ -2135,7 +2050,6 @@ function getQuestionBank(testMode, testCatalog){
   if(testCatalog === "unisex") return testMode === "quick" ? unisexQuickQuestions : unisexDeepQuestions;
   return testMode === "quick" ? quickQuestions : deepQuestions;
 }
-
 
 /* =========================================================
    TEST DETAILS VIEW
@@ -2178,7 +2092,7 @@ function showTestDetails(test){
       html += '<div class="recItem">';
       html += '<div class="recRank">' + (i+1) + '</div>';
       html += '<div class="recName">' + escapeHTML(r.name) + '</div>';
-      html += '<div class="recScore">' + tr("testCompat") + ' ' + Math.round(r.score) + '%</div>';
+      if(!r.noPct) html += '<div class="recScore">' + tr("testCompat") + ' ' + Math.round(r.score) + '%</div>';
       if(r.notes) html += '<div class="recNotes">' + escapeHTML(r.notes) + '</div>';
       html += '</div>';
     });
@@ -2216,7 +2130,6 @@ function showTestDetails(test){
   showModal(tr("testDetailsTitle"), html);
 }
 
-
 /* =========================================================
    CUSTOMER RECORD RENDERER
    ========================================================= */
@@ -2244,7 +2157,8 @@ function _renderCustomerRecord(cust, tests){
   html += '<p class="infoLine">' + tr("customerTestsCount") + ' ' + tests.length + '</p>';
 
   html += '<h4 style="margin:14px 0 8px;color:var(--accent2);font-size:14px;">' + tr("lastTestTitle") + '</h4>';
-  html += '<div class="historyItem" onclick="showTestByIndex(0)">';
+  html += '<div class="historyItem">';
+  html += '<div onclick="showTestByIndex(0)">';
   html += '<div class="hi-date">' + formatDate(latest.date) + '</div>';
   html += '<div class="hi-meta">' + tr("testTypeLabel") + ' ' + modeLabel(latest.mode) + ' · ' + catLabel(latest.catalog) + '</div>';
 
@@ -2257,18 +2171,26 @@ function _renderCustomerRecord(cust, tests){
   if(latest.recommendations && latest.recommendations.length > 0){
     html += '<div class="hi-top"><strong>Top 3:</strong><br>';
     latest.recommendations.forEach(function(r, i){
-      html += (i+1) + '. ' + escapeHTML(r.name) + ' — ' + Math.round(r.score) + '%<br>';
+      html += (i+1) + '. ' + escapeHTML(r.name) + (r.noPct ? '' : ' — ' + Math.round(r.score) + '%') + '<br>';
     });
     html += '</div>';
   }
   html += '<div class="hi-meta" style="margin-top:6px;color:var(--accent);">' + tr("clickFull") + '</div>';
   html += '</div>';
 
+  html += '<div class="hi-lastActions">';
+  html += '<button onclick="event.stopPropagation(); showTestByIndex(0);">' + tr("clickDetails").replace("← ","") + '</button>';
+  html += '<button onclick="event.stopPropagation(); showShareQR(\'' + escapeHTML(latest.testId) + '\');">' + tr("shareLastTest") + '</button>';
+  html += '</div>';
+  html += '</div>';
+
   if(tests.length > 1){
     html += '<h4 style="margin:14px 0 8px;color:var(--accent2);font-size:14px;">' + tr("testHistoryTitle") + '</h4>';
     tests.slice(1, 20).forEach(function(t, i){
       const idx = i + 1;
-      html += '<div class="historyItem" onclick="showTestByIndex(' + idx + ')">';
+      html += '<div class="historyItem">';
+      html += '<button class="hi-shareBtn" onclick="event.stopPropagation(); showShareQR(\'' + escapeHTML(t.testId) + '\');" title="' + tr("shareSpecificTest") + '">📱</button>';
+      html += '<div onclick="showTestByIndex(' + idx + ')">';
       html += '<div class="hi-date">' + formatDate(t.date) + '</div>';
       html += '<div class="hi-meta">' + modeLabel(t.mode) + ' · ' + catLabel(t.catalog) + '</div>';
       if(t.fingerprint && t.fingerprint.length === 12){
@@ -2279,11 +2201,12 @@ function _renderCustomerRecord(cust, tests){
       if(t.recommendations && t.recommendations.length > 0){
         html += '<div class="hi-top"><strong>Top 3:</strong><br>';
         t.recommendations.forEach(function(r, ri){
-          html += (ri+1) + '. ' + escapeHTML(r.name) + ' — ' + Math.round(r.score) + '%<br>';
+          html += (ri+1) + '. ' + escapeHTML(r.name) + (r.noPct ? '' : ' — ' + Math.round(r.score) + '%') + '<br>';
         });
         html += '</div>';
       }
       html += '<div class="hi-meta" style="margin-top:6px;color:var(--accent);">' + tr("clickDetails") + '</div>';
+      html += '</div>';
       html += '</div>';
     });
   }
@@ -2296,7 +2219,6 @@ function _renderCustomerRecord(cust, tests){
   showModal(tr("customerFpTitle"), html);
 }
 
-
 /* =========================================================
    SCREEN
    ========================================================= */
@@ -2306,7 +2228,6 @@ function showScreen(id){
   document.getElementById(id).classList.add("active");
   window.scrollTo(0,0);
 }
-
 
 /* =========================================================
    APPLY UI TEXT
@@ -2346,7 +2267,6 @@ function applyUIText(){
   }
 }
 
-
 /* =========================================================
    CATALOG SWITCH
    ========================================================= */
@@ -2362,7 +2282,6 @@ function setCatalog(type){
   if(type === "unisex") document.body.classList.add("unisex");
   applyUIText();
 }
-
 
 /* =========================================================
    START TEST
@@ -2385,7 +2304,6 @@ function startTest(selectedMode){
   showScreen("quiz");
   renderQuestion();
 }
-
 
 /* =========================================================
    RENDER QUESTION
@@ -2449,7 +2367,6 @@ function renderQuestion(){
   updateNextButton();
 }
 
-
 /* =========================================================
    SELECT
    ========================================================= */
@@ -2479,7 +2396,6 @@ function selectOption(index){
   renderQuestion();
 }
 
-
 /* =========================================================
    NEXT BUTTON
    ========================================================= */
@@ -2501,7 +2417,6 @@ function updateNextButton(){
   }
 }
 
-
 /* =========================================================
    NAVIGATION
    ========================================================= */
@@ -2520,7 +2435,6 @@ function nextQuestion(){
 function previousQuestion(){
   if(current > 0){ current--; renderQuestion(); }
 }
-
 
 /* =========================================================
    COMPUTE BOUNDS
@@ -2558,7 +2472,6 @@ function computeBounds(qs){
   return { B:B, UP:UP, DOWN:DOWN };
 }
 
-
 /* =========================================================
    CALCULATE (Model C)
    ========================================================= */
@@ -2595,23 +2508,77 @@ function calculateResult(){
   showResults();
 }
 
-
 /* =========================================================
-   SIMILARITY
+   SIMILARITY (legacy — not called)
    ========================================================= */
 
 function similarity(a,b){
   const weights = [1.15,.95,1.10,1.05,1.00,1.10,1.05,1.00,.90,.80,.90,1.10];
-  let total = 0, weight = 0;
+  let dot = 0, na = 0, nb = 0;
+  let dist = 0, totalW = 0;
   for(let i=0;i<12;i++){
-    const diff = Math.abs(a[i]-b[i]);
-    const sim = 100 - diff;
-    total += sim * weights[i];
-    weight += 100 * weights[i];
+    const w = weights[i];
+    dot += w * a[i] * b[i];
+    na  += w * a[i] * a[i];
+    nb  += w * b[i] * b[i];
+    dist += w * Math.abs(a[i] - b[i]);
+    totalW += w;
   }
-  return (total / weight) * 100;
+  if(na === 0 || nb === 0) return 0;
+  const cos = dot / (Math.sqrt(na) * Math.sqrt(nb));
+  const avgDist = dist / totalW;
+  const distScore = (100 - avgDist) / 100;
+  const combined = (cos * 0.6) + (distScore * 0.4);
+  return Math.max(0, Math.min(100, (combined * 100 - 30) * 1.4));
 }
 
+/* =========================================================
+   V9.7 — ENGINE D (standardized cosine)
+   ========================================================= */
+const D_PROFILE_STATS = {"men_quick":{"m":[46.5,36.53,48.16,45.48,49.39,50.2,47.3,48.45,49.38,47.43,43.85,48.4],"s":[13.91,22.0,11.85,12.95,11.11,11.55,12.99,16.34,13.72,13.29,15.73,12.66]},"men_deep":{"m":[47.98,43.3,48.3,47.39,49.18,49.49,48.44,49.11,49.36,48.12,45.6,48.44],"s":[12.56,14.74,10.85,10.78,9.68,10.02,9.42,11.72,10.86,10.33,12.17,9.89]},"women_quick":{"m":[47.71,39.71,49.11,46.6,48.19,49.34,46.76,48.35,49.51,43.58,41.81,47.93],"s":[13.65,19.62,11.78,14.32,11.76,11.45,12.59,16.62,14.61,15.33,18.26,12.48]},"women_deep":{"m":[48.39,41.64,48.92,50.03,49.23,49.78,48.22,49.68,49.77,47.49,44.11,48.78],"s":[9.29,15.56,9.11,10.19,8.31,7.94,8.83,10.16,9.93,9.91,13.36,8.73]},"unisex_quick":{"m":[46.45,36.68,48.11,45.64,49.5,50.21,47.09,48.61,49.49,47.56,43.78,48.4],"s":[13.97,21.84,11.86,12.93,11.19,11.54,13.05,16.39,13.86,13.27,15.82,12.69]},"unisex_deep":{"m":[47.75,43.19,48.4,47.49,49.3,49.73,48.49,49.12,49.44,48.19,45.41,48.71],"s":[12.65,14.81,10.85,10.75,9.72,10.09,9.34,11.8,10.98,10.5,12.14,9.92]}};
+
+const _dCache = {};
+function _dCatalogStats(catKey, perfumes){
+  const hit = _dCache[catKey];
+  if(hit && hit.n === perfumes.length) return hit;
+  const n = perfumes.length, mu = Array(12).fill(0), sg = Array(12).fill(0);
+  perfumes.forEach(function(p){ for(let d=0; d<12; d++) mu[d] += p.vector[d]; });
+  for(let d=0; d<12; d++) mu[d] /= n;
+  perfumes.forEach(function(p){ for(let d=0; d<12; d++) sg[d] += Math.pow(p.vector[d] - mu[d], 2); });
+  for(let d=0; d<12; d++){ sg[d] = Math.sqrt(sg[d] / n); if(sg[d] < 0.01) sg[d] = 1; }
+  const z = perfumes.map(function(p){ return p.vector.map(function(v, d){ return (v - mu[d]) / sg[d]; }); });
+  _dCache[catKey] = { n: n, mu: mu, sg: sg, z: z };
+  return _dCache[catKey];
+}
+
+function scoreCatalogV97(perfumes, prof){
+  const st = D_PROFILE_STATS[selectedCatalog + "_" + mode] || D_PROFILE_STATS.men_quick;
+  const cs = _dCatalogStats(selectedCatalog, perfumes);
+  const zu = prof.map(function(v, d){ return (v - st.m[d]) / st.s[d]; });
+  let nu = 0; for(let d=0; d<12; d++) nu += zu[d] * zu[d];
+  nu = Math.sqrt(nu);
+  return perfumes.map(function(p, i){
+    const zc = cs.z[i];
+    let dot = 0, nc = 0;
+    for(let d=0; d<12; d++){ dot += zu[d] * zc[d]; nc += zc[d] * zc[d]; }
+    nc = Math.sqrt(nc);
+    const cos = (nu === 0 || nc === 0) ? 0 : dot / (nu * nc);
+    return { name:p.name, notes:p.notes, vector:p.vector, score: Math.round(cos * 1000) / 10, cosine: cos };
+  });
+}
+
+function diagnoseEngine(prof, perfumes){
+  const list = scoreCatalogV97(perfumes || getAllPerfumes(), prof || profile);
+  const s = list.map(function(x){ return x.cosine; }).sort(function(a,b){ return b - a; });
+  const out = {
+    top1: +s[0].toFixed(3), top2: +s[1].toFixed(3), top3: +s[2].toFixed(3),
+    median: +s[Math.floor(s.length/2)].toFixed(3),
+    gap_1_to_3: +(s[0] - s[2]).toFixed(3),
+    spread_top_to_bottom: +(s[0] - s[s.length-1]).toFixed(3)
+  };
+  console.table(out);
+  return out;
+}
 
 /* =========================================================
    SHOW RESULTS
@@ -2626,14 +2593,12 @@ function showResults(){
     return;
   }
 
-  const scored = catalog.map(function(p){
-    return { name:p.name, notes:p.notes, vector:p.vector, score:similarity(profile,p.vector) };
-  });
+  const scored = scoreCatalogV97(catalog, profile);
   scored.sort(function(a,b){ return b.score - a.score; });
   const top = scored.slice(0,3);
 
   currentRecommendations = top.map(function(p){
-    return { name: p.name, notes: p.notes, score: Math.round(p.score * 10) / 10 };
+    return { name: p.name, notes: p.notes, score: Math.round(p.score * 10) / 10, noPct: true };
   });
 
   document.getElementById("tags").innerHTML = buildTags().map(function(x){
@@ -2642,7 +2607,7 @@ function showResults(){
 
   document.getElementById("results").innerHTML = top.map(function(p,index){
     let rank = index === 0 ? tr("rank1") : index === 1 ? tr("rank2") : tr("rank3");
-    const scoreText = tr("testCompat") + ' ' + Math.round(p.score) + '%';
+    const scoreText = '';
     return '<div class="perfume' + (index === 0 ? ' first' : '') + '">' +
       '<div class="perfumeRank">' + rank + '</div>' +
       '<div class="perfumeName">' + escapeHTML(p.name) + '</div>' +
@@ -2654,7 +2619,6 @@ function showResults(){
 
   showScreen("result");
 }
-
 
 /* =========================================================
    TAGS
@@ -2681,7 +2645,6 @@ function buildTags(){
   return tags.slice(0,4);
 }
 
-
 /* =========================================================
    REASON
    ========================================================= */
@@ -2693,7 +2656,6 @@ function buildReason(vector){
   const b = DIM[sims[1].index];
   return tr("testCompat") + ' <strong>' + escapeHTML(a) + '</strong> · <strong>' + escapeHTML(b) + '</strong>';
 }
-
 
 /* =========================================================
    ESCAPE
@@ -2708,7 +2670,6 @@ function escapeHTML(text){
     .replaceAll("'","&#039;");
 }
 
-
 /* =========================================================
    HOME
    ========================================================= */
@@ -2721,12 +2682,11 @@ function goHome(){
   showScreen("home");
 }
 
-
 /* =========================================================
    SHARE / QR LOGIC
    ========================================================= */
 
-function showShareQR(){
+function showShareQR(testId){
   if(!sessionCustomerId){
     showModal(tr("noResultTitle"),
       '<p>' + tr("shareNoResultMsg") + '</p>' +
@@ -2734,8 +2694,12 @@ function showShareQR(){
     return;
   }
 
-  const link = window.location.origin + window.location.pathname +
+  let link = window.location.origin + window.location.pathname +
     "?fp=" + encodeURIComponent(sessionCustomerId);
+
+  if(testId && typeof testId === "string"){
+    link += "&t=" + encodeURIComponent(testId);
+  }
 
   let html = '<p class="qrHint">' + tr("shareQRHint") + '</p>';
   html += '<div id="qrBox"></div>';
@@ -2751,6 +2715,7 @@ function showShareQR(){
   setTimeout(function(){
     try {
       const box = document.getElementById("qrBox");
+      if(!box) return;
       if(typeof QRCode === "undefined"){
         box.innerHTML = '<p class="errorMsg">' + tr("qrLoadError") + '</p>';
         return;
@@ -2789,8 +2754,9 @@ function copyShareLink(link){
     document.body.removeChild(ta);
   }
 }
+
 /* =========================================================
-   V9.4 — CUSTOMERS DASHBOARD (V9.4.1 موحّد)
+   CUSTOMERS DASHBOARD
    ========================================================= */
 
 function openCustomersDashboard(){
@@ -2878,14 +2844,14 @@ function filterCustomersList(){
   renderCustomersRows(_customersRowsCache, q.trim().toUpperCase());
 }
 
-
 /* =========================================================
-   SHARED VIEW LOGIC (?fp=<customerId>)
+   SHARED VIEW LOGIC
    ========================================================= */
 
 function checkSharedView(){
   const params = new URLSearchParams(window.location.search);
   const fp = params.get("fp");
+  const testId = params.get("t");
   if(!fp) return;
 
   const mainApp = document.getElementById("mainApp");
@@ -2905,8 +2871,17 @@ function checkSharedView(){
     return StorageManager.getTestsByCustomer(fp);
   }).then(function(tests){
     if(!tests || tests.length === 0) throw new Error("No tests");
-    tests.sort(function(a,b){ return (b.date || "").localeCompare(a.date || ""); });
-    renderSharedView(fp, tests[0]);
+
+    let targetTest = null;
+    if(testId){
+      targetTest = tests.find(function(x){ return x.testId === testId; });
+    }
+    if(!targetTest){
+      tests.sort(function(a,b){ return (b.date || "").localeCompare(a.date || ""); });
+      targetTest = tests[0];
+    }
+
+    renderSharedView(fp, targetTest);
   }).catch(function(){
     container.innerHTML = '<div class="logo"><div class="logoMark">✦</div>' +
       '<h1>' + tr("sharedViewTitle") + '</h1></div>' +
@@ -2947,7 +2922,7 @@ function renderSharedView(id, test){
       html += '<div class="perfumeRank">' + rank + '</div>';
       html += '<div class="perfumeName">' + escapeHTML(r.name) + '</div>';
       if(r.notes) html += '<div class="notes">' + escapeHTML(trN(r.notes)) + '</div>';
-      html += '<div class="matchScore">' + tr("testCompat") + ' ' + Math.round(r.score) + '%</div>';
+      if(!r.noPct) html += '<div class="matchScore">' + tr("testCompat") + ' ' + Math.round(r.score) + '%</div>';
       html += '</div>';
     });
   }
@@ -2959,9 +2934,8 @@ function renderSharedView(id, test){
   document.getElementById("sharedViewContainer").innerHTML = html;
 }
 
-
 /* =========================================================
-   FRENCH TRANSLATIONS — Options (V9.3.2-B)
+   FRENCH TRANSLATIONS — Options
    ========================================================= */
 
 const FR_OPTIONS = {
@@ -3177,137 +3151,8 @@ function trO(arabicText){
   return FR_OPTIONS[arabicText] || arabicText;
 }
 
-/* ===== V9.4.1 — Override renderQuestion لاستخدام trO ===== */
-const _origRenderQuestion = renderQuestion;
-renderQuestion = function(){
-  if(!Array.isArray(questions) || !questions[current]) return;
-  const q = questions[current];
-  const ans = Array.isArray(answers) ? answers : [];
-  if(!Array.isArray(ans[current])) ans[current] = [];
-
-  document.getElementById("counter").textContent =
-    String(current+1).padStart(2,"0") + " / " + String(questions.length).padStart(2,"0");
-
-  document.getElementById("progressBar").style.width =
-    ((current+1)/questions.length*100) + "%";
-
-  document.getElementById("questionKicker").textContent = trQ(q.title);
-  document.getElementById("question").textContent = trQ(q.question);
-  document.getElementById("hint").textContent = trQ(q.hint || "");
-
-  const sc = document.getElementById("selectionCounter");
-  if(q.type === "multi"){
-    const selected = ans[current].length;
-    let dots = "";
-    for(let i=0;i<q.max;i++){
-      dots += '<span class="dot' + (i < selected ? " on" : "") + '"></span>';
-    }
-    sc.innerHTML = '<span>' + selected + ' / ' + q.max + '</span><span class="dots">' + dots + '</span>';
-  } else {
-    sc.textContent = "1";
-  }
-
-  const fg = document.getElementById("fadeGroup");
-  fg.classList.remove("fadeGroup");
-  void fg.offsetWidth;
-  fg.classList.add("fadeGroup");
-
-  const box = document.getElementById("options");
-  box.innerHTML = "";
-
-  q.options.forEach(function(opt,index){
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "option";
-    const check = document.createElement("span");
-    check.className = "check";
-    check.textContent = "✓";
-    const text = document.createElement("span");
-    text.textContent = trO(opt[0]);
-    btn.appendChild(check);
-    btn.appendChild(text);
-    if(ans[current].includes(index)) btn.classList.add("selected");
-    btn.onclick = function(){ selectOption(index); };
-    box.appendChild(btn);
-  });
-
-  const backBtn = document.getElementById("backBtn");
-  if(backBtn) backBtn.disabled = (current === 0);
-
-  updateNextButton();
-};
-/* ===== END override ===== */
-
-/* ===== V9.4.2 — Override showTestDetails (trDim + trN) ===== */
-const _origShowTestDetails = showTestDetails;
-showTestDetails = function(test){
-  const bank = getQuestionBank(test.mode, test.catalog);
-
-  let html = '';
-  html += '<p class="infoLine">' + tr("testDateLabel") + ' ' + formatDate(test.date) + '</p>';
-  html += '<p class="infoLine">' + tr("testTypeLabel") + ' ' + modeLabel(test.mode) + ' · ' + tr("testCollectionLabel") + ' ' + catLabel(test.catalog) + '</p>';
-  html += '<p class="infoLine">' + tr("testEngineLabel") + ' ' + escapeHTML(test.engineVersion || '—') + '</p>';
-
-  if(test.fingerprint && test.fingerprint.length === 12){
-    html += '<h4 style="margin:14px 0 8px;color:var(--accent2);font-size:14px;">' + tr("testFpTitle") + '</h4>';
-    html += '<div class="fpGrid">';
-    for(let d=0; d<12; d++){
-      html += '<div class="fpCell">';
-      html += '<span class="fpLabel">' + escapeHTML(trDim(DIM[d])) + '</span>';
-      html += '<span class="fpValue">' + Math.round(test.fingerprint[d]) + '</span>';
-      html += '</div>';
-    }
-    html += '</div>';
-  }
-
-  if(test.recommendations && test.recommendations.length > 0){
-    html += '<h4 style="margin:14px 0 8px;color:var(--accent2);font-size:14px;">' + tr("testRecsTitle") + '</h4>';
-    test.recommendations.forEach(function(r, i){
-      html += '<div class="recItem">';
-      html += '<div class="recRank">' + (i+1) + '</div>';
-      html += '<div class="recName">' + escapeHTML(r.name) + '</div>';
-      html += '<div class="recScore">' + tr("testCompat") + ' ' + Math.round(r.score) + '%</div>';
-      if(r.notes) html += '<div class="recNotes">' + escapeHTML(trN(r.notes)) + '</div>';
-      html += '</div>';
-    });
-  }
-
-  html += '<h4 style="margin:14px 0 8px;color:var(--accent2);font-size:14px;">' + tr("testAnswersTitle") + '</h4>';
-
-  if(!Array.isArray(test.answers) || !Array.isArray(bank)){
-    html += '<p class="infoLine">' + tr("testNoAnswersMsg") + '</p>';
-  } else {
-    test.answers.forEach(function(ansArr, qi){
-      const q = bank[qi];
-      if(!q) return;
-      html += '<div class="ansBlock">';
-      html += '<div class="ansQ">' + (qi+1) + '. ' + escapeHTML(trQ(q.title)) + ' — ' + escapeHTML(trQ(q.question)) + '</div>';
-      if(!Array.isArray(ansArr) || ansArr.length === 0){
-        html += '<div class="ansEmpty">' + tr("testNoChoice") + '</div>';
-      } else {
-        html += '<ul class="ansList">';
-        ansArr.forEach(function(oi){
-          const opt = q.options[oi];
-          if(opt) html += '<li>' + escapeHTML(trO(opt[0])) + '</li>';
-        });
-        html += '</ul>';
-      }
-      html += '</div>';
-    });
-  }
-
-  html += '<div class="modalActions">';
-  html += '<button class="secondary" onclick="backToCustomer()">' + tr("backToHistoryBtn") + '</button>';
-  html += '<button class="secondary" onclick="hideModal()">' + tr("closeBtn") + '</button>';
-  html += '</div>';
-
-  showModal(tr("testDetailsTitle"), html);
-};
-/* ===== END override ===== */
-
-
 /* =========================================================
-   FRENCH TRANSLATIONS — Perfume Notes (V9.3.2-C)
+   FRENCH TRANSLATIONS — Perfume Notes
    ========================================================= */
 
 const FR_NOTES = {
@@ -3379,50 +3224,134 @@ function trN(arabicNotes){
   return FR_NOTES[arabicNotes] || arabicNotes;
 }
 
-/* ===== V9.4.1 — Override showResults لاستخدام trN ===== */
-const _origShowResults = showResults;
-showResults = function(){
-  const catalog = getAllPerfumes();
-  if(catalog.length === 0){
-    document.getElementById("tags").innerHTML = "";
-    document.getElementById("results").innerHTML = '<div class="emptyCatalog">—</div>';
-    showScreen("result");
-    return;
-  }
+/* =========================================================
+   FRENCH TRANSLATIONS — Questions & Hints
+   ========================================================= */
 
-  const scored = catalog.map(function(p){
-    return { name:p.name, notes:p.notes, vector:p.vector, score:similarity(profile,p.vector) };
-  });
-  scored.sort(function(a,b){ return b.score - a.score; });
-  const top = scored.slice(0,3);
-
-  currentRecommendations = top.map(function(p){
-    return { name: p.name, notes: p.notes, score: Math.round(p.score * 10) / 10 };
-  });
-
-  document.getElementById("tags").innerHTML = buildTags().map(function(x){
-    return '<span class="tag">' + escapeHTML(x) + '</span>';
-  }).join("");
-
-  document.getElementById("results").innerHTML = top.map(function(p,index){
-    let rank = index === 0 ? tr("rank1") : index === 1 ? tr("rank2") : tr("rank3");
-    const scoreText = tr("testCompat") + ' ' + Math.round(p.score) + '%';
-    return '<div class="perfume' + (index === 0 ? ' first' : '') + '">' +
-      '<div class="perfumeRank">' + rank + '</div>' +
-      '<div class="perfumeName">' + escapeHTML(p.name) + '</div>' +
-     '<div class="notes">' + escapeHTML(trN(p.notes)) + '</div>' +
-      '<div class="matchReason">' + buildReason(p.vector) + '</div>' +
-      '<div class="matchScore">' + scoreText + '</div>' +
-      '</div>';
-  }).join("");
-
-  showScreen("result");
+const FR_QUESTIONS = {
+  "الأجواء": "Ambiances",
+  "الروائح": "Odeurs",
+  "الإحساس": "Sensation",
+  "الحضور": "Présence",
+  "الصورة": "Image",
+  "الرسالة": "Message",
+  "الصوت": "Sons",
+  "الموسيقى": "Musique",
+  "العائلة العطرية": "Famille olfactive",
+  "الميزان": "Équilibre",
+  "الملمس": "Texture",
+  "الاكتشاف": "Découverte",
+  "التفاصيل الحسية": "Détails sensoriels",
+  "التعبير عن الذات": "Expression de soi",
+  "الأثر": "Impact",
+  "المزاج": "Humeur",
+  "الاختيار الأخير": "Dernier choix",
+  "المكان": "Lieu",
+  "الذاكرة الحسية": "Mémoire sensorielle",
+  "التفاصيل": "Détails",
+  "التناقض": "Contraste",
+  "الحلاوة": "Douceur",
+  "الجانب الزهري": "Note florale",
+  "علاقتك بالمألوف": "Rapport au familier",
+  "البصمة": "Empreinte",
+  "أي أجواء تجذبك من النظرة الأولى؟": "Quelles ambiances vous attirent au premier regard ?",
+  "أي روائح من الحياة اليومية تجد فيها شيئاً جميلاً؟": "Quelles odeurs du quotidien trouvez-vous belles ?",
+  "ما الإحساس الذي تبحث عنه أكثر في العطر؟": "Quelle sensation recherchez-vous le plus dans un parfum ?",
+  "كيف تحب أن يُلاحظ عطرك؟": "Comment aimez-vous que votre parfum soit remarqué ?",
+  "ما الصورة التي تريد أن يتركها عطرك؟": "Quelle image voulez-vous que votre parfum laisse ?",
+  "لو كان عطرك رسالة عنك، ماذا تريد أن يقول؟": "Si votre parfum était un message sur vous, que voudriez-vous qu'il dise ?",
+  "لو استطعت أن تنتقل الآن إلى أي أجواء، ماذا تختار؟": "Si vous pouviez vous transporter maintenant dans n'importe quelle ambiance, que choisiriez-vous ?",
+  "أي أصوات يمكن أن تجعلك تستمتع بالمكان أكثر؟": "Quels sons pourraient vous faire apprécier davantage un lieu ?",
+  "أي أجواء موسيقية أقرب إلى ذوقك؟": "Quelles ambiances musicales sont les plus proches de votre goût ?",
+  "أي إحساس تبحث عنه أكثر في العطر؟": "Quelle sensation recherchez-vous le plus dans un parfum ?",
+  "إلى أي مدى تحب أن يصل عطرك إلى الآخرين؟": "Jusqu'où aimez-vous que votre parfum parvienne aux autres ?",
+  "أي عالم من الروائح يجذبك أكثر؟": "Quel univers olfactif vous attire le plus ?",
+  "إلى أي جهة تميل؟": "Vers quel côté penchez-vous ?",
+  "أي إحساس أقرب إلى أنفك؟": "Quelle sensation est la plus proche de votre nez ?",
+  "عندما تختار عطراً، أين تجد نفسك؟": "Lorsque vous choisissez un parfum, où vous situez-vous ?",
+  "حين تدخلين مكانًا لأول مرة، أي أجواء تشد انتباهك تلقائيًا؟": "Lorsque vous entrez dans un lieu pour la première fois, quelles ambiances attirent votre attention ?",
+  "أحيانًا تكون هناك رائحة بسيطة تجعل المكان أجمل. أيها أقرب إليك؟": "Parfois une simple odeur rend un lieu plus beau. Laquelle est la plus proche de vous ?",
+  "إذا أردتِ أن يلتقط شخص ما شيئًا من شخصيتك من دون أن تتكلمي، ماذا تفضلين أن يشعر؟": "Si quelqu'un devait saisir quelque chose de votre personnalité sans que vous parliez, que préféreriez-vous qu'il ressente ?",
+  "حين تغادرين مكانًا، أي أثر يعجبك أن يبقى منك؟": "Lorsque vous quittez un lieu, quelle trace aimez-vous laisser ?",
+  "أي حالة تشعرين أنها الأقرب إلى مزاجك حين تكونين على طبيعتك؟": "Quel état vous semble le plus proche de votre humeur lorsque vous êtes vous-même ?",
+  "لو كان عطرك لا يقول عنك إلا جملة واحدة، أي جملة تختارين؟": "Si votre parfum ne disait qu'une seule phrase de vous, laquelle choisiriez-vous ?",
+  "لو استطعتِ أن تحتفظي بمشهد واحد حولك طوال اليوم، أي مشهد تختارين؟": "Si vous pouviez garder un seul décor autour de vous toute la journée, lequel choisiriez-vous ?",
+  "أي رائحة يمكن أن تعيدك فورًا إلى لحظة جميلة؟": "Quelle odeur peut vous ramener instantanément à un beau moment ?",
+  "حين تعجبك شخصية أو مكان، ما الذي يجذبك فيه أولًا؟": "Lorsqu'une personne ou un lieu vous plaît, qu'est-ce qui vous attire en premier ?",
+  "أي تركيبة من هذه التناقضات تجدينها أكثر إثارة؟": "Quelle combinaison de ces contrastes trouvez-vous la plus captivante ?",
+  "ما الإحساس الذي تريدين أن يمنحك إياه عطرك عندما تضعينه؟": "Quelle sensation voulez-vous que votre parfum vous procure ?",
+  "هل تريدين أن يكون عطرك جزءًا من مساحتك أم أن يدخل إلى مساحة الآخرين؟": "Voulez-vous que votre parfum fasse partie de votre espace ou qu'il entre dans celui des autres ?",
+  "حين تدخل الحلاوة في شيء تحبينه، أي شكل منها يجذبك؟": "Quand la douceur entre dans quelque chose que vous aimez, quelle forme vous attire ?",
+  "عندما تكون الرائحة زهرية، أي إحساس تريدين أن تأتي به؟": "Lorsqu'une odeur est florale, quelle sensation voulez-vous qu'elle apporte ?",
+  "لو كان عطرك شيئًا يمكنك لمسه، أي ملمس تتخيلينه؟": "Si votre parfum était une chose que vous pouviez toucher, quelle texture imagineriez-vous ?",
+  "عندما تجدين عطرًا يعجبك، ماذا تفعلين عادة؟": "Lorsque vous trouvez un parfum qui vous plaît, que faites-vous habituellement ?",
+  "أي صورة تشعرين أنها الأقرب إلى الطريقة التي تريدين أن يراك بها الآخرون؟": "Quelle image vous semble la plus proche de la façon dont vous voulez que les autres vous voient ?",
+  "لو اختفى اسم العطر وقارورته وكل ما يعرفه الناس عنه، ماذا تريدين أن يبقى منه؟": "Si le nom du parfum, son flacon et tout ce que les gens savent de lui disparaissaient, que voudriez-vous qu'il reste ?",
+  "أي أجواء تجذبكم من النظرة الأولى؟": "Quelles ambiances vous attirent au premier regard ?",
+  "أي روائح من الحياة اليومية تجدون فيها شيئًا جميلاً؟": "Quelles odeurs du quotidien trouvez-vous belles ?",
+  "ما الإحساس الذي تبحثون عنه أكثر في العطر؟": "Quelle sensation recherchez-vous le plus dans un parfum ?",
+  "كيف تحبون أن يُلاحظ عطركم؟": "Comment aimez-vous que votre parfum soit remarqué ?",
+  "ما الصورة التي تريدون أن يتركها عطركم؟": "Quelle image voulez-vous que votre parfum laisse ?",
+  "لو كان عطركم رسالة عنكم، ماذا تريدون أن يقول؟": "Si votre parfum était un message sur vous, que voudriez-vous qu'il dise ?",
+  "لو استطعتم أن تنتقلوا الآن إلى أي أجواء، ماذا تختارون؟": "Si vous pouviez vous transporter maintenant dans n'importe quelle ambiance, que choisiriez-vous ?",
+  "أي أصوات يمكن أن تجعلكم تستمتعون بالمكان أكثر؟": "Quels sons pourraient vous faire apprécier davantage un lieu ?",
+  "أي أجواء موسيقية أقرب إلى ذوقكم؟": "Quelles ambiances musicales sont les plus proches de votre goût ?",
+  "أي إحساس تبحثون عنه أكثر في العطر؟": "Quelle sensation recherchez-vous le plus dans un parfum ?",
+  "إلى أي مدى تحبون أن يصل عطركم إلى الآخرين؟": "Jusqu'où aimez-vous que votre parfum parvienne aux autres ?",
+  "أي عالم من الروائح يجذبكم أكثر؟": "Quel univers olfactif vous attire le plus ?",
+  "إلى أي جهة تميلون؟": "Vers quel côté penchez-vous ?",
+  "أي إحساس أقرب إلى أنوفكم؟": "Quelle sensation est la plus proche de votre nez ?",
+  "عندما تختارون عطرًا، أين تجدون أنفسكم؟": "Lorsque vous choisissez un parfum, où vous situez-vous ?",
+  "اختر حتى أربعة أجواء تشعر أنك تريد الدخول إليها.": "Choisissez jusqu'à quatre ambiances dans lesquelles vous voulez entrer.",
+  "اختر حتى أربعة. ليست هناك إجابة صحيحة.": "Choisissez jusqu'à quatre. Il n'y a pas de bonne réponse.",
+  "اختر حتى اثنين.": "Choisissez jusqu'à deux.",
+  "فكّر في الأثر الذي تريد أن يتركه العطر.": "Pensez à l'impression que vous voulez laisser.",
+  "اختر الجملة التي تشعر أنها الأقرب.": "Choisissez la phrase qui vous semble la plus proche.",
+  "اختر حتى أربعة أجواء تجذبك تلقائياً.": "Choisissez jusqu'à quatre ambiances qui vous attirent naturellement.",
+  "اختر حتى أربعة. هذه ليست عطوراً؛ إنها إشارات إلى ذوقك الحسي.": "Choisissez jusqu'à quatre. Ce ne sont pas des parfums ; ce sont des indices sur votre goût sensoriel.",
+  "اختر حتى أربعة.": "Choisissez jusqu'à quatre.",
+  "اختر حتى أربعة. لا تحتاج إلى التفكير كثيراً.": "Choisissez jusqu'à quatre. Pas besoin de trop réfléchir.",
+  "يمكنك اختيار اثنين.": "Vous pouvez en choisir deux.",
+  "فكّر في الأثر الذي يتركه العطر في المكان.": "Pensez à l'impression que le parfum laisse dans l'espace.",
+  "اختر الاتجاه الأقرب إلى أنفك.": "Choisissez la direction la plus proche de votre nez.",
+  "تخيل العطر على الورق، لا شكله.": "Imaginez le parfum sur papier, pas son apparence.",
+  "اختر الطريقة الأقرب إليك.": "Choisissez l'approche qui vous ressemble le plus.",
+  "اختاري حتى ثلاثة.": "Choisissez jusqu'à trois.",
+  "اختاري حتى أربعة. هذه ليست عطوراً؛ إنها إشارات إلى حواسك.": "Choisissez jusqu'à quatre. Ce ne sont pas des parfums ; ce sont des indices sur vos sens.",
+  "اختاري اثنين.": "Choisissez-en deux.",
+  "فكّري في الأثر الذي تريدين أن يتركه العطر.": "Pensez à l'impression que vous voulez laisser.",
+  "اختاري الجملة التي تشعرين أنها الأقرب.": "Choisissez la phrase qui vous semble la plus proche.",
+  "اختاري حتى أربعة.": "Choisissez jusqu'à quatre.",
+  "اختاري حتى أربعة. هذه ليست عطوراً؛ إنها ذكريات.": "Choisissez jusqu'à quatre. Ce ne sont pas des parfums ; ce sont des souvenirs.",
+  "اختاري اثنين. التناقضات تكشف الذوق أكثر من الإجابات المتوقعة.": "Choisissez-en deux. Les contrastes révèlent le goût mieux que les réponses attendues.",
+  "اختاري ما يصف رغبتك الفعلية.": "Choisissez ce qui décrit votre désir réel.",
+  "اختاري اثنين. تخيّلي الإحساس، لا الشكل.": "Choisissez-en deux. Imaginez la sensation, pas la forme.",
+  "اختاري ما يشبهك فعلاً.": "Choisissez ce qui vous ressemble vraiment.",
+  "هذا آخر سؤال. اختاري الجملة التي تلمس جوهر ما تبحثين عنه.": "C'est la dernière question. Choisissez la phrase qui touche l'essence de ce que vous cherchez.",
+  "اختاروا حتى أربعة أجواء تشعرون أنكم تريدون الدخول إليها.": "Choisissez jusqu'à quatre ambiances dans lesquelles vous voulez entrer.",
+  "اختاروا حتى أربعة. ليست هناك إجابة صحيحة.": "Choisissez jusqu'à quatre. Il n'y a pas de bonne réponse.",
+  "اختاروا حتى اثنين.": "Choisissez jusqu'à deux.",
+  "فكّروا في الأثر الذي تريدون أن يتركه العطر.": "Pensez à l'impression que vous voulez laisser.",
+  "اختاروا الجملة التي تشعرون أنها الأقرب.": "Choisissez la phrase qui vous semble la plus proche.",
+  "اختاروا حتى أربعة أجواء تجذبكم تلقائيًا.": "Choisissez jusqu'à quatre ambiances qui vous attirent naturellement.",
+  "اختاروا حتى أربعة. هذه ليست عطورًا؛ إنها إشارات إلى ذوقكم الحسي.": "Choisissez jusqu'à quatre. Ce ne sont pas des parfums ; ce sont des indices sur votre goût sensoriel.",
+  "اختاروا حتى أربعة.": "Choisissez jusqu'à quatre.",
+  "اختاروا حتى أربعة. لا تحتاجون إلى التفكير كثيرًا.": "Choisissez jusqu'à quatre. Pas besoin de trop réfléchir.",
+  "يمكنكم اختيار اثنين.": "Vous pouvez en choisir deux.",
+  "فكّروا في الأثر الذي يتركه العطر في المكان.": "Pensez à l'impression que le parfum laisse dans l'espace.",
+  "اختاروا الاتجاه الأقرب إلى أنوفكم.": "Choisissez la direction la plus proche de votre nez.",
+  "تخيّلوا العطر على الورق، لا شكله.": "Imaginez le parfum sur papier, pas son apparence.",
+  "اختاروا الطريقة الأقرب إليكم.": "Choisissez l'approche qui vous ressemble le plus."
 };
-/* ===== END override ===== */
 
+function trQ(arabicText){
+  if(!arabicText) return "";
+  if(currentLang === "ar") return arabicText;
+  return FR_QUESTIONS[arabicText] || arabicText;
+}
 
 /* =========================================================
-   FRENCH TRANSLATIONS — Tags & Dimensions (V9.3.2-D)
+   FRENCH TRANSLATIONS — Tags & Dimensions
    ========================================================= */
 
 const FR_DIM = {
@@ -3467,7 +3396,132 @@ function trTag(arabicText){
   return FR_TAGS[arabicText] || arabicText;
 }
 
-/* ===== V9.4.1 — Override buildTags ===== */
+/* =========================================================
+   OVERRIDES — renderQuestion, showResults, showTestDetails, buildTags, buildReason
+   ========================================================= */
+
+renderQuestion = function(){
+  if(!Array.isArray(questions) || !questions[current]) return;
+  const q = questions[current];
+  const ans = Array.isArray(answers) ? answers : [];
+  if(!Array.isArray(ans[current])) ans[current] = [];
+
+  document.getElementById("counter").textContent =
+    String(current+1).padStart(2,"0") + " / " + String(questions.length).padStart(2,"0");
+
+  document.getElementById("progressBar").style.width =
+    ((current+1)/questions.length*100) + "%";
+
+  document.getElementById("questionKicker").textContent = trQ(q.title);
+  document.getElementById("question").textContent = trQ(q.question);
+  document.getElementById("hint").textContent = trQ(q.hint || "");
+
+  const sc = document.getElementById("selectionCounter");
+  if(q.type === "multi"){
+    const selected = ans[current].length;
+    let dots = "";
+    for(let i=0;i<q.max;i++){
+      dots += '<span class="dot' + (i < selected ? " on" : "") + '"></span>';
+    }
+    sc.innerHTML = '<span>' + selected + ' / ' + q.max + '</span><span class="dots">' + dots + '</span>';
+  } else {
+    sc.textContent = "1";
+  }
+
+  const fg = document.getElementById("fadeGroup");
+  fg.classList.remove("fadeGroup");
+  void fg.offsetWidth;
+  fg.classList.add("fadeGroup");
+
+  const box = document.getElementById("options");
+  box.innerHTML = "";
+
+  q.options.forEach(function(opt,index){
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "option";
+    const check = document.createElement("span");
+    check.className = "check";
+    check.textContent = "✓";
+    const text = document.createElement("span");
+    text.textContent = trO(opt[0]);
+    btn.appendChild(check);
+    btn.appendChild(text);
+    if(ans[current].includes(index)) btn.classList.add("selected");
+    btn.onclick = function(){ selectOption(index); };
+    box.appendChild(btn);
+  });
+
+  const backBtn = document.getElementById("backBtn");
+  if(backBtn) backBtn.disabled = (current === 0);
+
+  updateNextButton();
+};
+
+showTestDetails = function(test){
+  const bank = getQuestionBank(test.mode, test.catalog);
+
+  let html = '';
+  html += '<p class="infoLine">' + tr("testDateLabel") + ' ' + formatDate(test.date) + '</p>';
+  html += '<p class="infoLine">' + tr("testTypeLabel") + ' ' + modeLabel(test.mode) + ' · ' + tr("testCollectionLabel") + ' ' + catLabel(test.catalog) + '</p>';
+  html += '<p class="infoLine">' + tr("testEngineLabel") + ' ' + escapeHTML(test.engineVersion || '—') + '</p>';
+
+  if(test.fingerprint && test.fingerprint.length === 12){
+    html += '<h4 style="margin:14px 0 8px;color:var(--accent2);font-size:14px;">' + tr("testFpTitle") + '</h4>';
+    html += '<div class="fpGrid">';
+    for(let d=0; d<12; d++){
+      html += '<div class="fpCell">';
+      html += '<span class="fpLabel">' + escapeHTML(trDim(DIM[d])) + '</span>';
+      html += '<span class="fpValue">' + Math.round(test.fingerprint[d]) + '</span>';
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  if(test.recommendations && test.recommendations.length > 0){
+    html += '<h4 style="margin:14px 0 8px;color:var(--accent2);font-size:14px;">' + tr("testRecsTitle") + '</h4>';
+    test.recommendations.forEach(function(r, i){
+      html += '<div class="recItem">';
+      html += '<div class="recRank">' + (i+1) + '</div>';
+      html += '<div class="recName">' + escapeHTML(r.name) + '</div>';
+      if(!r.noPct) html += '<div class="recScore">' + tr("testCompat") + ' ' + Math.round(r.score) + '%</div>';
+      if(r.notes) html += '<div class="recNotes">' + escapeHTML(trN(r.notes)) + '</div>';
+      html += '</div>';
+    });
+  }
+
+  html += '<h4 style="margin:14px 0 8px;color:var(--accent2);font-size:14px;">' + tr("testAnswersTitle") + '</h4>';
+
+  if(!Array.isArray(test.answers) || !Array.isArray(bank)){
+    html += '<p class="infoLine">' + tr("testNoAnswersMsg") + '</p>';
+  } else {
+    test.answers.forEach(function(ansArr, qi){
+      const q = bank[qi];
+      if(!q) return;
+      html += '<div class="ansBlock">';
+      html += '<div class="ansQ">' + (qi+1) + '. ' + escapeHTML(trQ(q.title)) + ' — ' + escapeHTML(trQ(q.question)) + '</div>';
+      if(!Array.isArray(ansArr) || ansArr.length === 0){
+        html += '<div class="ansEmpty">' + tr("testNoChoice") + '</div>';
+      } else {
+        html += '<ul class="ansList">';
+        ansArr.forEach(function(oi){
+          const opt = q.options[oi];
+          if(opt) html += '<li>' + escapeHTML(trO(opt[0])) + '</li>';
+        });
+        html += '</ul>';
+      }
+      html += '</div>';
+    });
+  }
+
+  html += '<div class="modalActions">';
+  html += '<button class="secondary" onclick="backToCustomer()">' + tr("backToHistoryBtn") + '</button>';
+  html += '<button class="secondary" onclick="hideModal()">' + tr("closeBtn") + '</button>';
+  html += '</div>';
+
+  showModal(tr("testDetailsTitle"), html);
+};
+
 buildTags = function(){
   const defs = [
     ["انتعاش واضح",0,70],["أجواء مائية",1,68],["خشبية",2,68],
@@ -3488,9 +3542,7 @@ buildTags = function(){
   }
   return tags.slice(0,4).map(function(t){ return trTag(t); });
 };
-/* ===== END override ===== */
 
-/* ===== V9.4.1 — Override buildReason ===== */
 buildReason = function(vector){
   const sims = vector.map(function(v,i){ return {index:i, diff:Math.abs(profile[i]-v)}; })
     .sort(function(a,b){ return a.diff - b.diff; });
@@ -3498,8 +3550,271 @@ buildReason = function(vector){
   const b = trDim(DIM[sims[1].index]);
   return tr("testCompat") + ' <strong>' + escapeHTML(a) + '</strong> · <strong>' + escapeHTML(b) + '</strong>';
 };
-/* ===== END override ===== */
 
+/* =========================================================
+   STATS
+   ========================================================= */
+
+function openStatsScreen(){
+  showScreen("statsScreen");
+  renderStatsScreen();
+}
+
+function renderStatsScreen(){
+  const container = document.getElementById("statsContent");
+  const subtitleEl = document.getElementById("statsSubtitle");
+  if(!container) return;
+
+  if(subtitleEl) subtitleEl.textContent = tr("statsSubtitle");
+
+  container.innerHTML = '<p class="infoLine" style="text-align:center;">' + tr("searching") + '</p>';
+
+  StorageManager.getAllCustomers().then(function(customers){
+    const arr = (customers || []).slice();
+    return Promise.all(arr.map(function(c){
+      return StorageManager.getTestsByCustomer(c.customerId).then(function(tests){
+        return { customer: c, tests: tests || [] };
+      });
+    }));
+  }).then(function(rows){
+    _statsCache = rows;
+    _renderStatsContent(rows);
+  }).catch(function(err){
+    container.innerHTML = '<div class="errorMsg">' + escapeHTML(err.message || tr("genericError")) + '</div>';
+  });
+}
+
+function _renderStatsContent(rows){
+  const container = document.getElementById("statsContent");
+  if(!container) return;
+
+  if(!rows || rows.length === 0){
+    container.innerHTML = '<div class="emptyCustomers">' + tr("statsNoData") + '</div>';
+    return;
+  }
+
+  const totalCustomers = rows.length;
+  let totalTests = 0;
+  const byCatalog = { men: 0, women: 0, unisex: 0 };
+  const byMode = { quick: 0, deep: 0 };
+  const perfumeCounts = {};
+
+  rows.forEach(function(r){
+    r.tests.forEach(function(t){
+      totalTests++;
+      if(t.catalog && byCatalog[t.catalog] !== undefined) byCatalog[t.catalog]++;
+      if(t.mode && byMode[t.mode] !== undefined) byMode[t.mode]++;
+      if(Array.isArray(t.recommendations)){
+        t.recommendations.forEach(function(rec){
+          if(rec && rec.name){
+            perfumeCounts[rec.name] = (perfumeCounts[rec.name] || 0) + 1;
+          }
+        });
+      }
+    });
+  });
+
+  const avg = totalCustomers > 0 ? (totalTests / totalCustomers).toFixed(1) : "0";
+
+  const topPerfumes = Object.keys(perfumeCounts)
+    .map(function(name){ return { name: name, count: perfumeCounts[name] }; })
+    .sort(function(a,b){ return b.count - a.count; })
+    .slice(0, 5);
+
+  let html = '';
+
+  html += '<div class="statsCard">';
+  html += '<div class="statsCardTitle">' + tr("statsTitle") + '</div>';
+  html += '<div class="statsGrid">';
+  html += '<div class="statsItem"><div class="statsNumber">' + totalCustomers + '</div><div class="statsLabel">' + tr("statsTotalCustomers") + '</div></div>';
+  html += '<div class="statsItem"><div class="statsNumber">' + totalTests + '</div><div class="statsLabel">' + tr("statsTotalTests") + '</div></div>';
+  html += '<div class="statsItem"><div class="statsNumber">' + avg + '</div><div class="statsLabel">' + tr("statsAvgTestsPerCustomer") + '</div></div>';
+  html += '</div></div>';
+
+  html += '<div class="statsCard">';
+  html += '<div class="statsCardTitle">' + tr("statsByCatalog") + '</div>';
+  html += _buildBarRow(tr("catMen"), byCatalog.men, totalTests);
+  html += _buildBarRow(tr("catWomen"), byCatalog.women, totalTests);
+  html += _buildBarRow(tr("catUnisex"), byCatalog.unisex, totalTests);
+  html += '</div>';
+
+  html += '<div class="statsCard">';
+  html += '<div class="statsCardTitle">' + tr("statsByMode") + '</div>';
+  html += _buildBarRow(tr("modeQuick"), byMode.quick, totalTests);
+  html += _buildBarRow(tr("modeDeep"), byMode.deep, totalTests);
+  html += '</div>';
+
+  if(topPerfumes.length > 0){
+    html += '<div class="statsCard">';
+    html += '<div class="statsCardTitle">' + tr("statsTopPerfumes") + '</div>';
+    topPerfumes.forEach(function(p, i){
+      html += '<div class="statsListItem">';
+      html += '<span><span class="sl-rank">#' + (i+1) + '</span><span class="sl-name">' + escapeHTML(p.name) + '</span></span>';
+      html += '<span class="sl-count">' + p.count + '</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
+}
+
+function _buildBarRow(label, value, total){
+  const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+  let html = '<div class="statsRow">';
+  html += '<span class="statsRowLabel">' + escapeHTML(label) + '</span>';
+  html += '<span class="statsRowValue">' + value + ' <span style="color:#8a878e;font-size:11px;">(' + pct + '%)</span></span>';
+  html += '</div>';
+  html += '<div class="statsBar"><div class="statsBarFill" style="width:' + pct + '%;"></div></div>';
+  return html;
+}
+
+/* =========================================================
+   CSV EXPORT
+   ========================================================= */
+
+function exportCustomersCSV(){
+  StorageManager.getAllCustomers().then(function(customers){
+    const arr = (customers || []).slice();
+    if(arr.length === 0){
+      showModal(tr("noResultTitle"),
+        '<p>' + tr("exportNoData") + '</p>' +
+        '<div class="modalActions"><button class="secondary" onclick="hideModal()">' + tr("okBtn") + '</button></div>');
+      return;
+    }
+
+    return Promise.all(arr.map(function(c){
+      return StorageManager.getTestsByCustomer(c.customerId).then(function(tests){
+        tests = tests || [];
+        tests.sort(function(x,y){ return (y.date || "").localeCompare(x.date || ""); });
+        return {
+          customerId: c.customerId,
+          createdAt: c.createdAt || "",
+          updatedAt: c.updatedAt || "",
+          testsCount: tests.length,
+          lastTestDate: tests[0] ? tests[0].date : ""
+        };
+      });
+    })).then(function(rows){
+      const header = ["customerId", "createdAt", "updatedAt", "testsCount", "lastTestDate"];
+      const lines = [header.join(",")];
+      rows.forEach(function(r){
+        lines.push([
+          _csvEscape(r.customerId),
+          _csvEscape(r.createdAt),
+          _csvEscape(r.updatedAt),
+          r.testsCount,
+          _csvEscape(r.lastTestDate)
+        ].join(","));
+      });
+      _downloadCSV(lines.join("\n"), "customers.csv");
+    });
+  }).catch(function(err){
+    showModal(tr("saveFailedTitle"),
+      '<div class="errorMsg">' + escapeHTML(err.message || tr("genericError")) + '</div>' +
+      '<div class="modalActions"><button class="secondary" onclick="hideModal()">' + tr("okBtn") + '</button></div>');
+  });
+}
+
+function exportTestsCSV(){
+  StorageManager.getAllCustomers().then(function(customers){
+    const arr = (customers || []).slice();
+    if(arr.length === 0){
+      showModal(tr("noResultTitle"),
+        '<p>' + tr("exportNoData") + '</p>' +
+        '<div class="modalActions"><button class="secondary" onclick="hideModal()">' + tr("okBtn") + '</button></div>');
+      return;
+    }
+
+    return Promise.all(arr.map(function(c){
+      return StorageManager.getTestsByCustomer(c.customerId).then(function(tests){
+        return (tests || []).map(function(t){
+          return { customerId: c.customerId, test: t };
+        });
+      });
+    })).then(function(allRows){
+      const rows = [];
+      allRows.forEach(function(list){
+        list.forEach(function(item){ rows.push(item); });
+      });
+
+      if(rows.length === 0){
+        showModal(tr("noResultTitle"),
+          '<p>' + tr("exportNoData") + '</p>' +
+          '<div class="modalActions"><button class="secondary" onclick="hideModal()">' + tr("okBtn") + '</button></div>');
+        return;
+      }
+
+      const header = [
+        "customerId", "testId", "date", "mode", "catalog",
+        "fp1","fp2","fp3","fp4","fp5","fp6","fp7","fp8","fp9","fp10","fp11","fp12",
+        "top1_name","top1_score","top2_name","top2_score","top3_name","top3_score"
+      ];
+      const lines = [header.join(",")];
+
+      rows.forEach(function(item){
+        const t = item.test;
+        const fp = (t.fingerprint && t.fingerprint.length === 12)
+          ? t.fingerprint.map(function(v){ return Math.round(v); })
+          : ["","","","","","","","","","","",""];
+        const recs = Array.isArray(t.recommendations) ? t.recommendations : [];
+        const r1 = recs[0] || {};
+        const r2 = recs[1] || {};
+        const r3 = recs[2] || {};
+
+        const row = [
+          _csvEscape(item.customerId),
+          _csvEscape(t.testId || ""),
+          _csvEscape(t.date || ""),
+          _csvEscape(t.mode || ""),
+          _csvEscape(t.catalog || "")
+        ];
+        fp.forEach(function(v){ row.push(v); });
+        row.push(_csvEscape(r1.name || ""));
+        row.push(r1.score !== undefined ? Math.round(r1.score) : "");
+        row.push(_csvEscape(r2.name || ""));
+        row.push(r2.score !== undefined ? Math.round(r2.score) : "");
+        row.push(_csvEscape(r3.name || ""));
+        row.push(r3.score !== undefined ? Math.round(r3.score) : "");
+
+        lines.push(row.join(","));
+      });
+
+      _downloadCSV(lines.join("\n"), "tests.csv");
+    });
+  }).catch(function(err){
+    showModal(tr("saveFailedTitle"),
+      '<div class="errorMsg">' + escapeHTML(err.message || tr("genericError")) + '</div>' +
+      '<div class="modalActions"><button class="secondary" onclick="hideModal()">' + tr("okBtn") + '</button></div>');
+  });
+}
+
+function _csvEscape(v){
+  if(v === null || v === undefined) return "";
+  let s = String(v);
+  if(s.indexOf(",") !== -1 || s.indexOf("\"") !== -1 || s.indexOf("\n") !== -1){
+    s = s.replace(/"/g, '""');
+    return '"' + s + '"';
+  }
+  return s;
+}
+
+function _downloadCSV(content, filename){
+  try {
+    const BOM = "\uFEFF";
+    const blob = new Blob([BOM + content], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 500);
+  } catch(e){
+    console.error("CSV download failed:", e);
+  }
+}
 
 /* =========================================================
    INIT
@@ -3516,6 +3831,10 @@ document.addEventListener("DOMContentLoaded", function(){
 });
 
 </script>
-
+<footer style="text-align:center;color:#77757a;font-size:10.5px;padding:20px 15px;margin-top:30px;border-top:1px solid #29292f;">
+  © 2026 Perfume Print — جميع الحقوق محفوظة
+  <br>
+  <span style="font-size:10px;">Achfaa Ismail · المغرب</span>
+</footer>
 </body>
 </html>
